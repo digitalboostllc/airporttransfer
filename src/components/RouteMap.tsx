@@ -168,7 +168,7 @@ export default function RouteMap({ pickup, destination, className = '', onRouteC
       // Only calculate route if both addresses are reasonably complete (avoid API errors for partial input)
       if (pickup.length < 10 || destination.length < 10) {
         // Clear any existing route for partial addresses
-        directionsRenderer.setDirections({ routes: [] });
+        directionsRenderer.set('directions', null);
         return;
       }
       
@@ -200,11 +200,11 @@ export default function RouteMap({ pickup, destination, className = '', onRouteC
               bounds.extend(leg.start_location);
               bounds.extend(leg.end_location);
             });
-            map.fitBounds(bounds, { padding: 50 });
+            map.fitBounds(bounds, 50);
           } else {
             console.warn(`Directions request failed: ${status}. This is normal for incomplete addresses.`);
             // Clear any existing route on error
-            directionsRenderer.setDirections({ routes: [] });
+            directionsRenderer.set('directions', null);
           }
         }
       );
