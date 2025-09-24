@@ -27,6 +27,7 @@ interface PlacePrediction {
 export default function AddressInput({ value, onChange, placeholder, icon, className = '' }: AddressInputProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
+  const retryCountRef = useRef<number>(0);
   const [isLoading, setIsLoading] = useState(false);
   const [suggestions, setSuggestions] = useState<PlacePrediction[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -68,9 +69,9 @@ export default function AddressInput({ value, onChange, placeholder, icon, class
         initGooglePlaces();
       } else {
         // Retry every 100ms for up to 10 seconds
-        const retryCount = (checkGoogleMaps as any).count || 0;
-        if (retryCount < 100) {
-          (checkGoogleMaps as any).count = retryCount + 1;
+        const currentRetryCount = retryCountRef.current || 0;
+        if (currentRetryCount < 100) {
+          retryCountRef.current = currentRetryCount + 1;
           setTimeout(checkGoogleMaps, 100);
         } else {
           console.error('❌ Google Maps API failed to load after 10 seconds');
@@ -173,7 +174,7 @@ export default function AddressInput({ value, onChange, placeholder, icon, class
       setShowSuggestions(false);
       setDropdownPosition(null);
     }
-  }, [autocompleteService]);
+  }, [autocompleteService, calculateDropdownPosition]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const inputValue = e.target.value;

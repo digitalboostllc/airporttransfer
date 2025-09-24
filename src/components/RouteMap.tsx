@@ -209,7 +209,7 @@ export default function RouteMap({ pickup, destination, className = '', onRouteC
         }
       );
     }
-  }, [pickup, destination, map, directionsService, directionsRenderer]);
+  }, [pickup, destination, map, directionsService, directionsRenderer, onRouteCalculated]);
 
   return (
     <div className={`relative rounded-2xl overflow-hidden shadow-xl ${className}`}>
