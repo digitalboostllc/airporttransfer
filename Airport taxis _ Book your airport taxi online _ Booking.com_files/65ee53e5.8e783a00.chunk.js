@@ -1,2 +1,0 @@
-"use strict";(self["b-taxi-lp-mfe__LOADABLE_LOADED_CHUNKS__"]=self["b-taxi-lp-mfe__LOADABLE_LOADED_CHUNKS__"]||[]).push([["65ee53e5"],{fe905f7b:(e,_,f)=>{f.r(_);var s=f("540adcd8");(0,s.serve)((()=>f.e("2242721f").then(f.bind(f,"64b778ad"))))}}]);
-//# sourceMappingURL=https://istatic.booking.com/internal-static/capla/static/js/65ee53e5.8e783a00.chunk.js.map
