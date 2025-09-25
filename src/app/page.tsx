@@ -252,10 +252,10 @@ export default function Home() {
               <div className="flex justify-between items-center">
                 <div className="flex items-center space-x-3">
                   <div className="w-8 h-8 bg-gradient-to-br from-red-500 to-orange-500 rounded-lg flex items-center justify-center">
-                    <span className="text-white font-bold text-sm">R</span>
+                    <span className="text-white font-bold text-sm">A</span>
                   </div>
                   <div>
-                    <div className="text-lg font-bold text-gray-800 tracking-tight">ride.ma</div>
+                    <div className="text-lg font-bold text-gray-800 tracking-tight">Airport Transfer</div>
                   </div>
                 </div>
                 <nav className="hidden md:flex items-center space-x-4">
@@ -1034,7 +1034,7 @@ export default function Home() {
           
           {/* Section Header */}
           <div className="text-center mb-4 sm:mb-6 lg:mb-8">
-            <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-2">Why Choose Ride.ma?</h2>
+            <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-2">Why Choose Airport Transfer?</h2>
           </div>
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
@@ -1113,8 +1113,8 @@ export default function Home() {
                 <Mail className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-white" />
               </div>
               <h3 className="text-xs sm:text-sm lg:text-base font-bold text-gray-900 mb-1">Email</h3>
-              <a href="mailto:booking@ride.ma" className="text-xs sm:text-sm lg:text-base font-bold text-blue-600 hover:text-blue-700 break-all leading-tight">
-                booking@ride.ma
+              <a href="mailto:booking@airporttransfer.ma" className="text-xs sm:text-sm lg:text-base font-bold text-blue-600 hover:text-blue-700 break-all leading-tight">
+                booking@airporttransfer.ma
               </a>
             </div>
           </div>
@@ -1231,11 +1231,11 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row justify-between items-center text-center sm:text-left">
             <div className="mb-4 sm:mb-0">
-              <div className="text-xl sm:text-2xl font-bold text-white">ride.ma</div>
+              <div className="text-xl sm:text-2xl font-bold text-white">Airport Transfer</div>
               <p className="text-sm text-gray-300">Premium Airport Transfer Service</p>
             </div>
             <div className="text-sm text-center sm:text-right text-gray-300">
-              <p>&copy; 2025 Ride.ma. All rights reserved.</p>
+              <p>&copy; 2025 Airport Transfer. All rights reserved.</p>
               <p>Licensed & Insured Transportation Service</p>
             </div>
           </div>

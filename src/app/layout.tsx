@@ -13,11 +13,11 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Ride.ma - Airport Transfer Service | Mohammed V Airport",
+  title: "Airport Transfer - Airport Transfer Service | Mohammed V Airport",
   description: "Professional airport transfer service from Mohammed V Airport to anywhere in Morocco. Book your comfortable, reliable ride today.",
   keywords: "airport transfer, Mohammed V Airport, Casablanca airport, Morocco transport, ride booking",
   openGraph: {
-    title: "Ride.ma - Premium Airport Transfer Service",
+    title: "Airport Transfer - Premium Airport Transfer Service",
     description: "Professional airport transfer service from Mohammed V Airport",
     type: "website",
   },
