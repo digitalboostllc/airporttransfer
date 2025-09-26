@@ -1,0 +1,389 @@
+// ============================================================================
+// Prisma Schema for Car Rental Marketplace
+// ============================================================================
+// This schema provides local development database with full TypeScript support
+// ============================================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================================
+// ENUMS
+// ============================================================================
+
+enum UserRole {
+  customer
+  agency_owner
+  agency_staff
+  admin
+}
+
+enum BookingStatus {
+  pending
+  confirmed
+  active
+  completed
+  cancelled
+}
+
+enum CarStatus {
+  available
+  rented
+  maintenance
+  inactive
+}
+
+enum TransmissionType {
+  manual
+  automatic
+  cvt
+}
+
+enum FuelType {
+  petrol
+  diesel
+  hybrid
+  electric
+}
+
+enum CarCategory {
+  economy
+  compact
+  midsize
+  luxury
+  suv
+  van
+  convertible
+  sports
+}
+
+// ============================================================================
+// CORE MODELS
+// ============================================================================
+
+model User {
+  id                     String    @id @default(cuid())
+  email                  String    @unique
+  phone                  String?
+  fullName               String    @map("full_name")
+  role                   UserRole  @default(customer)
+  passwordHash           String?   @map("password_hash")
+  avatarUrl              String?   @map("avatar_url")
+  dateOfBirth            DateTime? @map("date_of_birth")
+  drivingLicenseNumber   String?   @map("driving_license_number")
+  drivingLicenseExpiry   DateTime? @map("driving_license_expiry")
+  preferredLanguage      String    @default("en") @map("preferred_language")
+  emailVerified          Boolean   @default(false) @map("email_verified")
+  phoneVerified          Boolean   @default(false) @map("phone_verified")
+  isActive               Boolean   @default(true) @map("is_active")
+  lastLoginAt            DateTime? @map("last_login_at")
+  agencyId               String?   @unique @map("agency_id") // Link to agency for agency users
+  createdAt              DateTime  @default(now()) @map("created_at")
+  updatedAt              DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  agency                 Agency?   @relation(fields: [agencyId], references: [id])
+  bookings               Booking[]
+  reviews                Review[]
+  notifications          Notification[]
+  cancelledBookings      Booking[] @relation("BookingCancelledBy")
+
+  @@map("users")
+}
+
+model Location {
+  id               String  @id @default(cuid())
+  name             String
+  address          String
+  city             String
+  country          String  @default("Morocco")
+  postalCode       String? @map("postal_code")
+  latitude         Float?
+  longitude        Float?
+  isAirport        Boolean @default(false) @map("is_airport")
+  airportCode      String? @map("airport_code")
+  operatingHours   String? @map("operating_hours") // JSON string
+  contactPhone     String? @map("contact_phone")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  agenciesAsPrimary Agency[]
+  agencyLocations   AgencyLocation[]
+  pickupBookings    Booking[] @relation("PickupLocation")
+  dropoffBookings   Booking[] @relation("DropoffLocation")
+
+  @@map("locations")
+}
+
+model Agency {
+  id                    String    @id @default(cuid())
+  name                  String
+  slug                  String    @unique
+  description           String?
+  logoUrl               String?   @map("logo_url")
+  coverImageUrl         String?   @map("cover_image_url")
+  email                 String
+  phone                 String
+  websiteUrl            String?   @map("website_url")
+  licenseNumber         String?   @unique @map("license_number")
+  primaryLocationId     String?   @map("primary_location_id")
+  address               String
+  city                  String
+  foundedYear           Int?      @map("founded_year")
+  fleetSize             Int       @default(0) @map("fleet_size")
+  languages             String    @default("[\"ar\", \"fr\", \"en\"]") // JSON string
+  commissionRate        Float     @default(10.00) @map("commission_rate")
+  autoConfirmBookings   Boolean   @default(false) @map("auto_confirm_bookings")
+  cancellationPolicy    String?   @map("cancellation_policy")
+  termsAndConditions    String?   @map("terms_and_conditions")
+  isVerified            Boolean   @default(false) @map("is_verified")
+  isActive              Boolean   @default(true) @map("is_active")
+  status                String    @default("pending") // pending, approved, rejected, suspended
+  verificationDocuments String?   @map("verification_documents") // JSON string
+  rejectionReason       String?   @map("rejection_reason")
+  suspensionReason      String?   @map("suspension_reason")
+  approvedAt            DateTime? @map("approved_at")
+  rejectedAt            DateTime? @map("rejected_at")
+  averageRating         Float     @default(0.00) @map("average_rating")
+  totalReviews          Int       @default(0) @map("total_reviews")
+  createdAt             DateTime  @default(now()) @map("created_at")
+  updatedAt             DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  primaryLocation       Location? @relation(fields: [primaryLocationId], references: [id])
+  user                  User?     // Agency owner/manager user
+  cars                  Car[]
+  bookings              Booking[]
+  reviews               Review[]
+  optionalExtras        OptionalExtra[]
+  pricingRules          PricingRule[]
+  agencyLocations       AgencyLocation[]
+
+  @@map("agencies")
+}
+
+model AgencyLocation {
+  id         String   @id @default(cuid())
+  agencyId   String   @map("agency_id")
+  locationId String   @map("location_id")
+  isPrimary  Boolean  @default(false) @map("is_primary")
+  services   String   @default("[\"pickup\", \"dropoff\"]") // JSON string
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  // Relations
+  agency     Agency   @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+  location   Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
+
+  @@unique([agencyId, locationId])
+  @@map("agency_locations")
+}
+
+model Car {
+  id                     String           @id @default(cuid())
+  agencyId               String           @map("agency_id")
+  make                   String
+  model                  String
+  year                   Int
+  color                  String?
+  licensePlate           String?          @unique @map("license_plate")
+  vin                    String?          @unique
+  category               CarCategory
+  bodyType               String?          @map("body_type")
+  seats                  Int
+  doors                  Int
+  luggageCapacity        Int?             @map("luggage_capacity")
+  transmission           TransmissionType
+  fuelType               FuelType         @map("fuel_type")
+  engineSize             String?          @map("engine_size")
+  fuelCapacity           Int?             @map("fuel_capacity")
+  features               String           @default("[]") // JSON string
+  basePricePerDay        Float            @map("base_price_per_day")
+  pricePerKm             Float            @default(0.00) @map("price_per_km")
+  freeKmPerDay           Int              @default(0) @map("free_km_per_day")
+  securityDeposit        Float            @map("security_deposit")
+  minimumAge             Int              @default(21) @map("minimum_age")
+  minimumLicenseYears    Int              @default(1) @map("minimum_license_years")
+  basicInsuranceIncluded Boolean          @default(true) @map("basic_insurance_included")
+  insuranceDailyCost     Float            @default(0.00) @map("insurance_daily_cost")
+  status                 CarStatus        @default(available)
+  isFeatured             Boolean          @default(false) @map("is_featured")
+  lastServiceDate        DateTime?        @map("last_service_date")
+  nextServiceDate        DateTime?        @map("next_service_date")
+  mileage                Int              @default(0)
+  images                 String           @default("[]") // JSON string
+  mainImageUrl           String?          @map("main_image_url")
+  createdAt              DateTime         @default(now()) @map("created_at")
+  updatedAt              DateTime         @updatedAt @map("updated_at")
+
+  // Relations
+  agency                 Agency           @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+  bookings               Booking[]
+  reviews                Review[]
+  pricingRules           PricingRule[]
+
+  @@map("cars")
+}
+
+model OptionalExtra {
+  id              String          @id @default(cuid())
+  agencyId        String          @map("agency_id")
+  name            String
+  description     String?
+  pricePerDay     Float?          @map("price_per_day")
+  pricePerBooking Float?          @map("price_per_booking")
+  maxQuantity     Int             @default(1) @map("max_quantity")
+  isActive        Boolean         @default(true) @map("is_active")
+  createdAt       DateTime        @default(now()) @map("created_at")
+
+  // Relations
+  agency          Agency          @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+  bookingExtras   BookingExtra[]
+
+  @@map("optional_extras")
+}
+
+model Booking {
+  id                     String        @id @default(cuid())
+  bookingReference       String        @unique @map("booking_reference")
+  customerId             String?       @map("customer_id")
+  agencyId               String?       @map("agency_id")
+  carId                  String?       @map("car_id")
+  customerName           String        @map("customer_name")
+  customerEmail          String        @map("customer_email")
+  customerPhone          String        @map("customer_phone")
+  pickupLocationId       String?       @map("pickup_location_id")
+  dropoffLocationId      String?       @map("dropoff_location_id")
+  pickupDatetime         DateTime      @map("pickup_datetime")
+  dropoffDatetime        DateTime      @map("dropoff_datetime")
+  actualPickupDatetime   DateTime?     @map("actual_pickup_datetime")
+  actualDropoffDatetime  DateTime?     @map("actual_dropoff_datetime")
+  basePrice              Float         @map("base_price")
+  extrasPrice            Float         @default(0.00) @map("extras_price")
+  insurancePrice         Float         @default(0.00) @map("insurance_price")
+  taxAmount              Float         @default(0.00) @map("tax_amount")
+  totalPrice             Float         @map("total_price")
+  securityDeposit        Float         @map("security_deposit")
+  currency               String        @default("MAD")
+  status                 BookingStatus @default(pending)
+  confirmationCode       String?       @map("confirmation_code")
+  specialRequests        String?       @map("special_requests")
+  drivingLicenseInfo     String?       @map("driving_license_info") // JSON string
+  paymentStatus          String        @default("pending") @map("payment_status")
+  paymentMethod          String?       @map("payment_method")
+  paymentReference       String?       @map("payment_reference")
+  paidAt                 DateTime?     @map("paid_at")
+  cancelledAt            DateTime?     @map("cancelled_at")
+  cancelledById          String?       @map("cancelled_by_id")
+  cancellationReason     String?       @map("cancellation_reason")
+  refundAmount           Float?        @map("refund_amount")
+  createdAt              DateTime      @default(now()) @map("created_at")
+  updatedAt              DateTime      @updatedAt @map("updated_at")
+
+  // Relations
+  customer               User?         @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  agency                 Agency?       @relation(fields: [agencyId], references: [id], onDelete: SetNull)
+  car                    Car?          @relation(fields: [carId], references: [id], onDelete: SetNull)
+  pickupLocation         Location?     @relation("PickupLocation", fields: [pickupLocationId], references: [id])
+  dropoffLocation        Location?     @relation("DropoffLocation", fields: [dropoffLocationId], references: [id])
+  cancelledBy            User?         @relation("BookingCancelledBy", fields: [cancelledById], references: [id])
+  extras                 BookingExtra[]
+  reviews                Review[]
+  notifications          Notification[]
+
+  @@map("bookings")
+}
+
+model BookingExtra {
+  id         String        @id @default(cuid())
+  bookingId  String        @map("booking_id")
+  extraId    String        @map("extra_id")
+  quantity   Int           @default(1)
+  unitPrice  Float         @map("unit_price")
+  totalPrice Float         @map("total_price")
+
+  // Relations
+  booking    Booking       @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  extra      OptionalExtra @relation(fields: [extraId], references: [id], onDelete: Cascade)
+
+  @@unique([bookingId, extraId])
+  @@map("booking_extras")
+}
+
+model Review {
+  id                   String    @id @default(cuid())
+  bookingId            String    @map("booking_id")
+  customerId           String?   @map("customer_id")
+  agencyId             String    @map("agency_id")
+  carId                String    @map("car_id")
+  rating               Int
+  title                String?
+  comment              String?
+  cleanlinessRating    Int?      @map("cleanliness_rating")
+  serviceRating        Int?      @map("service_rating")
+  valueRating          Int?      @map("value_rating")
+  isVerified           Boolean   @default(false) @map("is_verified")
+  isFeatured           Boolean   @default(false) @map("is_featured")
+  agencyResponse       String?   @map("agency_response")
+  agencyResponseDate   DateTime? @map("agency_response_date")
+  createdAt            DateTime  @default(now()) @map("created_at")
+  updatedAt            DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  booking              Booking   @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  customer             User?     @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  agency               Agency    @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+  car                  Car       @relation(fields: [carId], references: [id], onDelete: Cascade)
+
+  @@unique([bookingId])
+  @@map("reviews")
+}
+
+model PricingRule {
+  id              String   @id @default(cuid())
+  agencyId        String   @map("agency_id")
+  carId           String?  @map("car_id")
+  name            String
+  ruleType        String   @map("rule_type")
+  startDate       DateTime? @map("start_date")
+  endDate         DateTime? @map("end_date")
+  minRentalDays   Int?     @map("min_rental_days")
+  maxRentalDays   Int?     @map("max_rental_days")
+  daysOfWeek      String?  @map("days_of_week") // JSON string
+  adjustmentType  String   @map("adjustment_type") // 'percentage' or 'fixed_amount'
+  adjustmentValue Float    @map("adjustment_value")
+  isActive        Boolean  @default(true) @map("is_active")
+  priority        Int      @default(0)
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  // Relations
+  agency          Agency   @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+  car             Car?     @relation(fields: [carId], references: [id], onDelete: Cascade)
+
+  @@map("pricing_rules")
+}
+
+model Notification {
+  id                String    @id @default(cuid())
+  userId            String    @map("user_id")
+  type              String
+  title             String
+  message           String
+  relatedBookingId  String?   @map("related_booking_id")
+  actionUrl         String?   @map("action_url")
+  isRead            Boolean   @default(false) @map("is_read")
+  sentVia           String    @default("[]") // JSON string
+  createdAt         DateTime  @default(now()) @map("created_at")
+
+  // Relations
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  relatedBooking    Booking?  @relation(fields: [relatedBookingId], references: [id], onDelete: SetNull)
+
+  @@map("notifications")
+}

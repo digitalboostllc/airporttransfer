@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { AuthProvider } from "@/contexts/AuthContext";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -13,12 +14,12 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Airport Transfer - Airport Transfer Service | Mohammed V Airport",
-  description: "Professional airport transfer service from Mohammed V Airport to anywhere in Morocco. Book your comfortable, reliable ride today.",
-  keywords: "airport transfer, Mohammed V Airport, Casablanca airport, Morocco transport, ride booking",
+  title: "Venboo - Car Rental & Airport Transfer Service | Morocco",
+  description: "Premium car rental and airport transfer service in Morocco. Book luxury vehicles, economy cars, and reliable airport transfers from Mohammed V Airport.",
+  keywords: "car rental Morocco, airport transfer, Mohammed V Airport, Casablanca car rental, vehicle rental, transport booking",
   openGraph: {
-    title: "Airport Transfer - Premium Airport Transfer Service",
-    description: "Professional airport transfer service from Mohammed V Airport",
+    title: "Venboo - Premium Car Rental & Transport in Morocco",
+    description: "Book premium cars and reliable airport transfers across Morocco with Venboo",
     type: "website",
   },
 };
@@ -38,7 +39,9 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <AuthProvider>
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );
