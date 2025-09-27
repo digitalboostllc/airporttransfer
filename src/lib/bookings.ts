@@ -2,12 +2,20 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
+// Generate unique booking reference
+function generateBookingReference(): string {
+  const timestamp = Date.now().toString(36);
+  const random = Math.random().toString(36).substring(2, 8);
+  return `VB-${timestamp}-${random}`.toUpperCase();
+}
+
 export interface BookingData {
   userId: string;
   carId: string;
   pickupDate: Date;
   returnDate: Date;
   pickupLocation: string;
+  dropoffLocation?: string;
   contactDetails: {
     name: string;
     email: string;
@@ -17,22 +25,35 @@ export interface BookingData {
   };
   selectedExtras: string[];
   paymentMethod: 'card' | 'cash';
+  basePrice: number;
+  extrasPrice?: number;
+  insurancePrice?: number;
+  taxAmount?: number;
   totalAmount: number;
+  securityDeposit?: number;
   status?: 'pending' | 'confirmed' | 'cancelled' | 'completed';
 }
 
 export interface Booking {
   id: string;
-  userId: string;
+  bookingReference: string;
+  customerId: string;
   carId: string;
-  pickupDate: Date;
-  returnDate: Date;
-  pickupLocation: string;
+  customerName: string;
+  customerEmail: string;
+  customerPhone: string;
+  pickupDatetime: Date;
+  dropoffDatetime: Date;
   status: string;
-  totalAmount: number;
-  contactDetails: Record<string, string>;
-  selectedExtras: string[];
+  basePrice: number;
+  extrasPrice: number;
+  insurancePrice: number;
+  taxAmount: number;
+  totalPrice: number;
+  securityDeposit: number;
   paymentMethod: string;
+  paymentStatus: string;
+  specialRequests?: string;
   createdAt: Date;
   updatedAt: Date;
   car: {
@@ -51,29 +72,47 @@ export interface Booking {
 // Create a new booking
 export async function createBooking(bookingData: BookingData): Promise<{ success: boolean; bookingId?: string; error?: string }> {
   try {
-    // TODO: Fix booking schema - missing required fields: bookingReference, customerName, customerEmail, customerPhone
-    console.log('Booking creation temporarily disabled due to schema mismatch', bookingData);
-    return { success: false, error: 'Booking creation temporarily disabled - schema needs to be fixed' };
-
-    /* COMMENTED OUT UNTIL SCHEMA IS FIXED
+    // Generate unique booking reference
+    const bookingReference = generateBookingReference();
+    
+    // Calculate pricing breakdown
+    const basePrice = bookingData.basePrice;
+    const extrasPrice = bookingData.extrasPrice || 0;
+    const insurancePrice = bookingData.insurancePrice || 0;
+    const taxAmount = bookingData.taxAmount || (basePrice + extrasPrice + insurancePrice) * 0.2; // 20% tax
+    const securityDeposit = bookingData.securityDeposit || basePrice * 0.3; // 30% security deposit
+    
+    // Create the booking
     const booking = await prisma.booking.create({
       data: {
-        customerId: bookingData.userId, // Field is customerId in schema
+        bookingReference,
+        customerId: bookingData.userId,
         carId: bookingData.carId,
+        customerName: bookingData.contactDetails.name,
+        customerEmail: bookingData.contactDetails.email,
+        customerPhone: bookingData.contactDetails.phone,
         pickupDatetime: bookingData.pickupDate,
         dropoffDatetime: bookingData.returnDate,
-        // pickupLocation: bookingData.pickupLocation, // TODO: Fix relation structure
-        status: bookingData.status || 'pending',
+        basePrice,
+        extrasPrice,
+        insurancePrice,
+        taxAmount,
         totalPrice: bookingData.totalAmount,
-        // contactDetails: JSON.stringify(bookingData.contactDetails), // TODO: Add to schema
-        // selectedExtras: JSON.stringify(bookingData.selectedExtras), // TODO: Add to schema
+        securityDeposit,
+        status: bookingData.status || 'pending',
         paymentMethod: bookingData.paymentMethod,
-        paymentStatus: bookingData.paymentMethod === 'cash' ? 'pending' : 'completed'
+        paymentStatus: bookingData.paymentMethod === 'cash' ? 'pending' : 'completed',
+        specialRequests: bookingData.contactDetails.additionalRequests,
+        drivingLicenseInfo: JSON.stringify({
+          licenseNumber: bookingData.contactDetails.drivingLicense
+        })
       }
     });
 
-    return { success: true, bookingId: booking.id };
-    */
+    return {
+      success: true,
+      bookingId: booking.id
+    };
   } catch (error) {
     console.error('Create booking error:', error);
     return { success: false, error: 'Failed to create booking' };
@@ -83,11 +122,6 @@ export async function createBooking(bookingData: BookingData): Promise<{ success
 // Get user bookings
 export async function getUserBookings(userId: string): Promise<Booking[]> {
   try {
-    // TODO: Fix booking interface and schema mismatches
-    console.log('getUserBookings temporarily disabled due to schema mismatch', userId);
-    return [];
-
-    /* COMMENTED OUT UNTIL SCHEMA IS FIXED
     const bookings = await prisma.booking.findMany({
       where: { customerId: userId },
       include: {
@@ -104,33 +138,40 @@ export async function getUserBookings(userId: string): Promise<Booking[]> {
 
     return bookings.map(booking => ({
       id: booking.id,
-      userId: booking.userId,
-      carId: booking.carId,
-      pickupDate: booking.pickupDate,
-      returnDate: booking.returnDate,
-      pickupLocation: booking.pickupLocation,
+      bookingReference: booking.bookingReference,
+      customerId: booking.customerId || '',
+      carId: booking.carId || '',
+      customerName: booking.customerName,
+      customerEmail: booking.customerEmail,
+      customerPhone: booking.customerPhone,
+      pickupDatetime: booking.pickupDatetime,
+      dropoffDatetime: booking.dropoffDatetime,
       status: booking.status,
-      totalAmount: booking.totalAmount,
-      contactDetails: JSON.parse(booking.contactDetails || '{}'),
-      selectedExtras: JSON.parse(booking.selectedExtras || '[]'),
-      paymentMethod: booking.paymentMethod,
+      basePrice: booking.basePrice,
+      extrasPrice: booking.extrasPrice,
+      insurancePrice: booking.insurancePrice,
+      taxAmount: booking.taxAmount,
+      totalPrice: booking.totalPrice,
+      securityDeposit: booking.securityDeposit,
+      paymentMethod: booking.paymentMethod || '',
+      paymentStatus: booking.paymentStatus,
+      specialRequests: booking.specialRequests || undefined,
       createdAt: booking.createdAt,
       updatedAt: booking.updatedAt,
       car: {
-        id: booking.car.id,
-        make: booking.car.make,
-        model: booking.car.model,
-        year: booking.car.year,
-        category: booking.car.category,
-        images: Array.isArray(booking.car.images) 
+        id: booking.car?.id || '',
+        make: booking.car?.make || '',
+        model: booking.car?.model || '',
+        year: booking.car?.year || 0,
+        category: booking.car?.category || '',
+        images: Array.isArray(booking.car?.images) 
           ? booking.car.images 
-          : booking.car.images ? [booking.car.images] : [],
+          : booking.car?.images ? [booking.car.images] : [],
         agency: {
-          name: booking.car.agency?.name || 'Unknown Agency'
+          name: booking.car?.agency?.name || 'Unknown Agency'
         }
       }
     }));
-    */
   } catch (error) {
     console.error('Get user bookings error:', error);
     return [];
@@ -140,11 +181,6 @@ export async function getUserBookings(userId: string): Promise<Booking[]> {
 // Get booking by ID
 export async function getBookingById(bookingId: string, userId: string): Promise<Booking | null> {
   try {
-    // TODO: Fix booking interface and schema mismatches
-    console.log('getBookingById temporarily disabled due to schema mismatch', bookingId, userId);
-    return null;
-
-    /* COMMENTED OUT UNTIL SCHEMA IS FIXED
     const booking = await prisma.booking.findFirst({
       where: { 
         id: bookingId, 
@@ -165,33 +201,40 @@ export async function getBookingById(bookingId: string, userId: string): Promise
 
     return {
       id: booking.id,
-      userId: booking.userId,
-      carId: booking.carId,
-      pickupDate: booking.pickupDate,
-      returnDate: booking.returnDate,
-      pickupLocation: booking.pickupLocation,
+      bookingReference: booking.bookingReference,
+      customerId: booking.customerId || '',
+      carId: booking.carId || '',
+      customerName: booking.customerName,
+      customerEmail: booking.customerEmail,
+      customerPhone: booking.customerPhone,
+      pickupDatetime: booking.pickupDatetime,
+      dropoffDatetime: booking.dropoffDatetime,
       status: booking.status,
-      totalAmount: booking.totalAmount,
-      contactDetails: JSON.parse(booking.contactDetails || '{}'),
-      selectedExtras: JSON.parse(booking.selectedExtras || '[]'),
-      paymentMethod: booking.paymentMethod,
+      basePrice: booking.basePrice,
+      extrasPrice: booking.extrasPrice,
+      insurancePrice: booking.insurancePrice,
+      taxAmount: booking.taxAmount,
+      totalPrice: booking.totalPrice,
+      securityDeposit: booking.securityDeposit,
+      paymentMethod: booking.paymentMethod || '',
+      paymentStatus: booking.paymentStatus,
+      specialRequests: booking.specialRequests || undefined,
       createdAt: booking.createdAt,
       updatedAt: booking.updatedAt,
       car: {
-        id: booking.car.id,
-        make: booking.car.make,
-        model: booking.car.model,
-        year: booking.car.year,
-        category: booking.car.category,
-        images: Array.isArray(booking.car.images) 
+        id: booking.car?.id || '',
+        make: booking.car?.make || '',
+        model: booking.car?.model || '',
+        year: booking.car?.year || 0,
+        category: booking.car?.category || '',
+        images: Array.isArray(booking.car?.images) 
           ? booking.car.images 
-          : booking.car.images ? [booking.car.images] : [],
+          : booking.car?.images ? [booking.car.images] : [],
         agency: {
-          name: booking.car.agency?.name || 'Unknown Agency'
+          name: booking.car?.agency?.name || 'Unknown Agency'
         }
       }
     };
-    */
   } catch (error) {
     console.error('Get booking by ID error:', error);
     return null;
@@ -232,11 +275,6 @@ export async function cancelBooking(bookingId: string, userId: string): Promise<
 // Get agency bookings
 export async function getAgencyBookings(agencyId: string): Promise<Booking[]> {
   try {
-    // TODO: Fix booking interface and schema mismatches
-    console.log('getAgencyBookings temporarily disabled due to schema mismatch', agencyId);
-    return [];
-
-    /* COMMENTED OUT UNTIL SCHEMA IS FIXED
     const bookings = await prisma.booking.findMany({
       where: {
         car: {
@@ -264,33 +302,40 @@ export async function getAgencyBookings(agencyId: string): Promise<Booking[]> {
 
     return bookings.map(booking => ({
       id: booking.id,
-      userId: booking.userId,
-      carId: booking.carId,
-      pickupDate: booking.pickupDate,
-      returnDate: booking.returnDate,
-      pickupLocation: booking.pickupLocation,
+      bookingReference: booking.bookingReference,
+      customerId: booking.customerId || '',
+      carId: booking.carId || '',
+      customerName: booking.customerName,
+      customerEmail: booking.customerEmail,
+      customerPhone: booking.customerPhone,
+      pickupDatetime: booking.pickupDatetime,
+      dropoffDatetime: booking.dropoffDatetime,
       status: booking.status,
-      totalAmount: booking.totalAmount,
-      contactDetails: JSON.parse(booking.contactDetails || '{}'),
-      selectedExtras: JSON.parse(booking.selectedExtras || '[]'),
-      paymentMethod: booking.paymentMethod,
+      basePrice: booking.basePrice,
+      extrasPrice: booking.extrasPrice,
+      insurancePrice: booking.insurancePrice,
+      taxAmount: booking.taxAmount,
+      totalPrice: booking.totalPrice,
+      securityDeposit: booking.securityDeposit,
+      paymentMethod: booking.paymentMethod || '',
+      paymentStatus: booking.paymentStatus,
+      specialRequests: booking.specialRequests || undefined,
       createdAt: booking.createdAt,
       updatedAt: booking.updatedAt,
       car: {
-        id: booking.car.id,
-        make: booking.car.make,
-        model: booking.car.model,
-        year: booking.car.year,
-        category: booking.car.category,
-        images: Array.isArray(booking.car.images) 
+        id: booking.car?.id || '',
+        make: booking.car?.make || '',
+        model: booking.car?.model || '',
+        year: booking.car?.year || 0,
+        category: booking.car?.category || '',
+        images: Array.isArray(booking.car?.images) 
           ? booking.car.images 
-          : booking.car.images ? [booking.car.images] : [],
+          : booking.car?.images ? [booking.car.images] : [],
         agency: {
-          name: booking.car.agency?.name || 'Unknown Agency'
+          name: booking.car?.agency?.name || 'Unknown Agency'
         }
       }
     }));
-    */
   } catch (error) {
     console.error('Get agency bookings error:', error);
     return [];

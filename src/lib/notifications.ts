@@ -35,13 +35,13 @@ export function generateBookingConfirmationEmail(
 ): EmailTemplate {
   const bookingId = `CR-${booking.id.slice(-8)}`;
   const carName = `${booking.car.make} ${booking.car.model} ${booking.car.year}`;
-  const pickupDate = new Date(booking.pickupDate).toLocaleDateString('en-US', {
+  const pickupDate = new Date(booking.pickupDatetime).toLocaleDateString('en-US', {
     weekday: 'long',
     year: 'numeric',
     month: 'long',
     day: 'numeric'
   });
-  const returnDate = new Date(booking.returnDate).toLocaleDateString('en-US', {
+  const returnDate = new Date(booking.dropoffDatetime).toLocaleDateString('en-US', {
     weekday: 'long',
     year: 'numeric',
     month: 'long',
@@ -120,7 +120,7 @@ export function generateBookingConfirmationEmail(
                         </div>
                         <div class="detail-item">
                             <div class="detail-label">📍 Pickup Location</div>
-                            <div class="detail-value">${booking.pickupLocation}</div>
+                            <div class="detail-value">Pickup Location</div>
                         </div>
                         <div class="detail-item">
                             <div class="detail-label">🆔 Booking ID</div>
@@ -130,7 +130,7 @@ export function generateBookingConfirmationEmail(
                 </div>
                 
                 <div class="total-section">
-                    <div class="total-amount">${booking.totalAmount} MAD</div>
+                    <div class="total-amount">${booking.totalPrice} MAD</div>
                     <p class="total-label">Total Amount</p>
                 </div>
                 
@@ -178,8 +178,8 @@ export function generateBookingConfirmationEmail(
     - Agency: ${booking.car.agency.name}
     - Pickup: ${pickupDate}
     - Return: ${returnDate}
-    - Location: ${booking.pickupLocation}
-    - Total: ${booking.totalAmount} MAD
+    - Location: Pickup Location
+    - Total: ${booking.totalPrice} MAD
     
     WHAT'S NEXT:
     - Bring a valid driver's license and credit card
@@ -246,7 +246,7 @@ export function generateBookingCancellationEmail(
                 
                 <div class="refund-info">
                     <h4>💰 Refund Information</h4>
-                    <p>If you paid online, your refund of <strong>${booking.totalAmount} MAD</strong> will be processed within 3-5 business days.</p>
+                    <p>If you paid online, your refund of <strong>${booking.totalPrice} MAD</strong> will be processed within 3-5 business days.</p>
                 </div>
                 
                 <p>We're sorry to see your travel plans change. We hope to serve you again in the future!</p>
@@ -268,7 +268,7 @@ export function generateBookingCancellationEmail(
     We've processed your cancellation request for booking ${bookingId}.
     
     Cancelled Car: ${carName}
-    Original Amount: ${booking.totalAmount} MAD
+    Original Amount: ${booking.totalPrice} MAD
     
     REFUND: If you paid online, your refund will be processed within 3-5 business days.
     
@@ -313,9 +313,7 @@ export async function sendAgencyBookingNotification(booking: Booking, agencyEmai
   try {
     const bookingId = `CR-${booking.id.slice(-8)}`;
     const carName = `${booking.car.make} ${booking.car.model} ${booking.car.year}`;
-    const customerName = typeof booking.contactDetails === 'string' 
-      ? JSON.parse(booking.contactDetails).name 
-      : booking.contactDetails.name;
+  const customerName = booking.customerName;
 
     const template: EmailTemplate = {
       to: agencyEmail,
@@ -325,13 +323,13 @@ export async function sendAgencyBookingNotification(booking: Booking, agencyEmai
         <p><strong>Booking ID:</strong> ${bookingId}</p>
         <p><strong>Car:</strong> ${carName}</p>
         <p><strong>Customer:</strong> ${customerName}</p>
-        <p><strong>Pickup:</strong> ${new Date(booking.pickupDate).toLocaleDateString()}</p>
-        <p><strong>Return:</strong> ${new Date(booking.returnDate).toLocaleDateString()}</p>
-        <p><strong>Amount:</strong> ${booking.totalAmount} MAD</p>
+        <p><strong>Pickup:</strong> ${new Date(booking.pickupDatetime).toLocaleDateString()}</p>
+        <p><strong>Return:</strong> ${new Date(booking.dropoffDatetime).toLocaleDateString()}</p>
+        <p><strong>Amount:</strong> ${booking.totalPrice} MAD</p>
         
         <p>Please log in to your agency dashboard to manage this booking.</p>
       `,
-      text: `New Booking: ${carName} for ${customerName}. Booking ID: ${bookingId}. Amount: ${booking.totalAmount} MAD.`
+      text: `New Booking: ${carName} for ${customerName}. Booking ID: ${bookingId}. Amount: ${booking.totalPrice} MAD.`
     };
 
     return await sendEmail(template);

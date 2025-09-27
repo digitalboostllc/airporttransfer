@@ -160,6 +160,12 @@ export default function BookingPage() {
     setLoading(true);
     try {
       // Create the booking
+      const basePrice = mockCar.pricePerDay * rentalDays;
+      const extrasPrice = 0; // TODO: Calculate from selectedExtras
+      const insurancePrice = 0; // TODO: Calculate based on insurance selection
+      const taxAmount = (basePrice + extrasPrice + insurancePrice) * 0.2; // 20% tax
+      const securityDeposit = basePrice * 0.3; // 30% security deposit
+      
       const bookingData = {
         userId: user.id,
         carId: params.id as string,
@@ -169,7 +175,12 @@ export default function BookingPage() {
         contactDetails,
         selectedExtras,
         paymentMethod: paymentMethod as 'card' | 'cash',
+        basePrice,
+        extrasPrice,
+        insurancePrice,
+        taxAmount,
         totalAmount: totalPrice,
+        securityDeposit,
         status: 'confirmed' as const
       };
 
@@ -179,16 +190,24 @@ export default function BookingPage() {
         // Send confirmation email (don't wait for it to complete)
         sendBookingConfirmation({
           id: bookingResult.bookingId!,
-          userId: user.id,
+          bookingReference: `VB-${Date.now()}`, // This will be generated properly in the booking function
+          customerId: user.id,
           carId: params.id as string,
-          pickupDate,
-          returnDate,
-          pickupLocation: pickup_location,
+          customerName: contactDetails.name,
+          customerEmail: contactDetails.email,
+          customerPhone: contactDetails.phone,
+          pickupDatetime: pickupDate,
+          dropoffDatetime: returnDate,
           status: 'confirmed',
-          totalAmount: totalPrice,
-          contactDetails,
-          selectedExtras,
+          basePrice,
+          extrasPrice,
+          insurancePrice,
+          taxAmount,
+          totalPrice: totalPrice,
+          securityDeposit,
           paymentMethod,
+          paymentStatus: 'completed',
+          specialRequests: contactDetails.additionalRequests,
           createdAt: new Date(),
           updatedAt: new Date(),
           car: {

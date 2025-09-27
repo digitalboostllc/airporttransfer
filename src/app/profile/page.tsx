@@ -472,19 +472,19 @@ function ProfilePage() {
                                 </h3>
                                 <p className="text-sm text-gray-600">{booking.car.agency.name}</p>
                                 <p className="text-sm text-gray-500">
-                                  {format(booking.pickupDate, 'MMM dd')} - {format(booking.returnDate, 'MMM dd, yyyy')}
+                                  {format(booking.pickupDatetime, 'MMM dd')} - {format(booking.dropoffDatetime, 'MMM dd, yyyy')}
                                 </p>
                                 <p className="text-sm text-gray-500">
-                                  📍 {booking.pickupLocation}
+                                  📍 Pickup Location
                                 </p>
                               </div>
                             </div>
                             
                             <div className="flex flex-col sm:items-end gap-3">
                               <div className="text-right">
-                                <div className="text-lg font-bold text-gray-900">{booking.totalAmount} MAD</div>
+                                <div className="text-lg font-bold text-gray-900">{booking.totalPrice} MAD</div>
                                 <div className="text-sm text-gray-500">
-                                  {differenceInDays(booking.returnDate, booking.pickupDate)} days
+                                  {differenceInDays(booking.dropoffDatetime, booking.pickupDatetime)} days
                                 </div>
                               </div>
                               
