@@ -1,28 +1,26 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { 
   Car, 
   Plus, 
   Calendar, 
-  Users, 
   DollarSign, 
-  TrendingUp,
   Edit3,
   Trash2,
   Eye,
   Settings,
   BarChart3,
-  MapPin,
   Star
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { useAuth, useRequireAuth } from '@/contexts/AuthContext';
+import { useRequireAuth } from '@/contexts/AuthContext';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { cn } from '@/lib/utils';
+import Image from 'next/image';
 
 // Mock data for agency dashboard
 const mockAgencyData = {
@@ -349,14 +347,12 @@ function AgencyDashboardPage() {
                       <div className="flex items-start justify-between mb-4">
                         <div className="flex items-center space-x-4">
                           <div className="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden">
-                            <img
-                              src={car.image}
+                            <Image
+                              src={car.image || '/placeholder-car.png'}
                               alt={`${car.make} ${car.model}`}
+                              width={64}
+                              height={64}
                               className="w-full h-full object-cover"
-                              onError={(e) => {
-                                const target = e.target as HTMLImageElement;
-                                target.src = '/placeholder-car.png';
-                              }}
                             />
                           </div>
                           <div>

@@ -29,6 +29,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import Link from 'next/link';
+import Image from 'next/image';
 //import { getCarById as getCarByIdFromDB } from '@/lib/prisma';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -388,14 +389,13 @@ function CarDetailsContent() {
             {/* Car Images */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
               <div className="relative h-80">
-                <img 
-                  src={car.images[selectedImageIndex]} 
+                <Image 
+                  src={car.images[selectedImageIndex] || '/placeholder-car.png'} 
                   alt={`${car.make} ${car.model}`}
-                  className="w-full h-full object-cover bg-gray-100"
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    target.src = '/placeholder-car.png';
-                  }}
+                  fill
+                  className="object-cover bg-gray-100"
+                  placeholder="blur"
+                  blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R+i"
                 />
                 <div className="absolute top-4 left-4 px-3 py-1 bg-blue-500 text-white rounded-full text-sm font-semibold capitalize">
                   {car.category}
@@ -412,9 +412,11 @@ function CarDetailsContent() {
                         selectedImageIndex === index ? "border-red-500" : "border-gray-200"
                       )}
                     >
-                      <img 
+                      <Image 
                         src={image} 
                         alt={`${car.make} ${car.model} ${index + 1}`}
+                        width={64}
+                        height={64}
                         className="w-full h-full object-cover"
                       />
                     </button>

@@ -1,5 +1,4 @@
 import { PrismaClient } from '@prisma/client';
-import { User } from './auth';
 import { sendEmail } from './notifications';
 
 const prisma = new PrismaClient();

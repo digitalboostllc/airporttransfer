@@ -24,6 +24,7 @@ import { sendBookingCancellation } from '@/lib/notifications';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { format, differenceInDays } from 'date-fns';
+import Image from 'next/image';
 
 function ProfilePage() {
   const router = useRouter();
@@ -124,7 +125,7 @@ function ProfilePage() {
     if (activeTab === 'bookings' && user) {
       loadBookings();
     }
-  }, [activeTab, user]);
+  }, [activeTab, user, loadBookings]);
 
   // Handle booking cancellation
   const handleCancelBooking = async (bookingId: string) => {
@@ -456,14 +457,12 @@ function ProfilePage() {
                           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                             <div className="flex items-center space-x-4">
                               <div className="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
-                                <img
+                                <Image
                                   src={booking.car.images[0] || '/placeholder-car.png'}
                                   alt={`${booking.car.make} ${booking.car.model}`}
+                                  width={64}
+                                  height={64}
                                   className="w-full h-full object-cover"
-                                  onError={(e) => {
-                                    const target = e.target as HTMLImageElement;
-                                    target.src = '/placeholder-car.png';
-                                  }}
                                 />
                               </div>
                               <div>

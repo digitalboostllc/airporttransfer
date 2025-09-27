@@ -23,7 +23,6 @@ import {
   RotateCcw,
   Luggage,
   Snowflake,
-  Wifi,
   MessageSquare,
   UserCheck,
   ArrowRight,
@@ -38,6 +37,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
+import Image from "next/image";
 import dynamic from 'next/dynamic';
 import AddressInput from '@/components/AddressInput';
 import Header from '@/components/Header';
@@ -308,11 +308,12 @@ export default function Home() {
         ></div>
         
         {/* Background Image - Mobile (Optimized) */}
-        <img 
+        <Image 
           src="/morocco-hero-bg-mobile.jpg" 
           alt="Morocco Landscape" 
-          className="md:hidden absolute inset-0 w-full h-full object-cover"
-          loading="eager"
+          fill
+          className="md:hidden object-cover"
+          priority
         />
         
         {/* Dark overlay for text readability */}
@@ -1003,10 +1004,11 @@ export default function Home() {
             {/* Left Column - Hero Vehicle with Integrated Header */}
             <div className="col-span-7 bg-gradient-to-br from-orange-500 to-red-600 rounded-3xl overflow-hidden shadow-xl group relative">
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent z-10"></div>
-              <img 
+              <Image 
                 src="/mercedes-gle.webp" 
                 alt="Mercedes-Benz GLE" 
-                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                fill
+                className="object-cover group-hover:scale-110 transition-transform duration-700"
               />
               
               {/* Integrated Header - Top Left */}
@@ -1092,10 +1094,11 @@ export default function Home() {
                {/* Middle Right - Mercedes E-Class */}
                <div className="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl overflow-hidden shadow-lg group relative h-[135px]">
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent z-10"></div>
-                <img 
+                <Image 
                   src="/mercedes-e-class.webp" 
                   alt="Mercedes-Benz E-Class" 
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                  fill
+                  className="object-cover group-hover:scale-110 transition-transform duration-700"
                 />
                 <div className="absolute top-4 right-4 bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-bold z-20 shadow-lg">
                   EXECUTIVE
@@ -1123,10 +1126,11 @@ export default function Home() {
                {/* Bottom Right - Mercedes V-Class */}
                <div className="bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl overflow-hidden shadow-lg group relative h-[135px]">
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent z-10"></div>
-                <img 
+                <Image 
                   src="/mercedes-v-class.webp" 
                   alt="Mercedes-Benz V-Class" 
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                  fill
+                  className="object-cover group-hover:scale-110 transition-transform duration-700"
                 />
                 <div className="absolute top-4 right-4 bg-purple-500 text-white px-3 py-1 rounded-full text-xs font-bold z-20 shadow-lg">
                   LUXURY
@@ -1211,10 +1215,11 @@ export default function Home() {
              ].map((vehicle, index) => (
                <div key={index} className={`bg-gradient-to-br ${vehicle.gradient} rounded-2xl overflow-hidden shadow-lg group relative h-[200px]`}>
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent z-10"></div>
-                <img 
+                <Image 
                   src={`/mercedes-${vehicle.name.toLowerCase().includes('gle') ? 'gle' : vehicle.name.toLowerCase().includes('e-class') ? 'e-class' : 'v-class'}.webp`}
                   alt={vehicle.name}
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                  fill
+                  className="object-cover group-hover:scale-110 transition-transform duration-700"
                 />
                 <div className={`absolute top-4 right-4 bg-${vehicle.color}-500 text-white px-3 py-1 rounded-full text-xs font-bold z-20 shadow-lg`}>
                   {vehicle.category}

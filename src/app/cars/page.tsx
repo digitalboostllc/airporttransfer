@@ -24,6 +24,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import Link from 'next/link';
+import Image from 'next/image';
 import { searchCars } from '@/lib/prisma';
 import type { CarSearchParams } from '@/types/database.types';
 import Header from '@/components/Header';
@@ -502,11 +503,11 @@ function CarListingContent() {
         ></div>
         
         {/* Background Image - Mobile (Optimized) */}
-        <img 
+        <Image 
           src="/morocco-hero-bg-mobile.jpg" 
           alt="Morocco Landscape" 
-          className="md:hidden absolute inset-0 w-full h-full object-cover"
-          loading="lazy"
+          fill
+          className="md:hidden object-cover"
         />
         
         {/* Dark overlay for text readability */}
@@ -999,14 +1000,14 @@ function CarListingContent() {
                       {/* Car Image & Basic Info */}
                       <div className="md:col-span-1">
                         <div className="relative">
-                          <img 
+                          <Image 
                             src={car.mainImageUrl || car.images?.[0] || '/placeholder-car.png'} 
                             alt={`${car.make} ${car.model}`}
+                            width={400}
+                            height={128}
                             className="w-full h-32 object-cover rounded-lg bg-gray-100"
-                            onError={(e) => {
-                              const target = e.target as HTMLImageElement;
-                              target.src = '/placeholder-car.png';
-                            }}
+                            placeholder="blur"
+                            blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R+i"
                           />
                           <div className={cn(
                             "absolute top-2 left-2 px-2 py-1 rounded-full text-xs font-semibold text-white capitalize",

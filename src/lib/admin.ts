@@ -55,7 +55,6 @@ export async function getPlatformStats(): Promise<PlatformStats> {
   try {
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    const startOfDay = new Date(now.setHours(0, 0, 0, 0));
     const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
 
     const [

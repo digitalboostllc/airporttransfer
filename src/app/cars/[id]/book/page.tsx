@@ -10,12 +10,7 @@ import {
   Clock, 
   CreditCard,
   Shield,
-  Check,
-  User,
-  Phone,
-  Mail,
-  Plus,
-  Minus
+  Check
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -26,6 +21,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { format, differenceInDays } from 'date-fns';
 import { cn } from '@/lib/utils';
+import Image from 'next/image';
 
 interface BookingExtras {
   id: string;
@@ -600,14 +596,12 @@ export default function BookingPage() {
               {/* Car Info */}
               <div className="flex items-center space-x-3 mb-6 pb-6 border-b border-gray-200">
                 <div className="w-16 h-12 bg-gray-100 rounded-lg overflow-hidden">
-                  <img
-                    src={mockCar.image}
+                  <Image
+                    src={mockCar.image || '/placeholder-car.png'}
                     alt={`${mockCar.make} ${mockCar.model}`}
+                    width={64}
+                    height={48}
                     className="w-full h-full object-cover"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.src = '/placeholder-car.png';
-                    }}
                   />
                 </div>
                 <div>

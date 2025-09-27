@@ -18,17 +18,15 @@ import {
   Ban,
   UserCheck,
   UserX,
-  Clock,
-  Mail,
-  Phone
+  Clock
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { useAuth, useRequireAuth } from '@/contexts/AuthContext';
+import { useRequireAuth } from '@/contexts/AuthContext';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { cn } from '@/lib/utils';
-import { format, differenceInDays } from 'date-fns';
+import { format } from 'date-fns';
 import {
   getPlatformStats,
   getAllUsers,

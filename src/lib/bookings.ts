@@ -252,7 +252,7 @@ export async function updateBookingStatus(
       ? { id: bookingId, userId } // Users can only update their own bookings
       : { id: bookingId }; // Agencies/admins can update any booking
 
-    const booking = await prisma.booking.update({
+    await prisma.booking.update({
       where: whereClause,
       data: { 
         status,
