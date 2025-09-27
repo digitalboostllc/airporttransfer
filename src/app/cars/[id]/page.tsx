@@ -31,6 +31,7 @@ import { format } from "date-fns";
 import Link from 'next/link';
 import Image from 'next/image';
 //import { getCarById as getCarByIdFromDB } from '@/lib/prisma';
+import { getCarById } from '@/lib/car-client';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 
@@ -188,54 +189,7 @@ const getCarById = (id: string) => {
   return cars[id as keyof typeof cars] || null;
 }; */
 
-// Stub function for now - would be replaced with database call
-const getCarById = (id: string): CarType | null => {
-  // For now, return a sample car for demo purposes
-  return {
-    id: id,
-    make: 'Mercedes-Benz',
-    model: 'A-Class',
-    year: 2023,
-    category: 'luxury',
-    pricePerDay: 380,
-    images: [
-      '/images/mercedes-a-class-1.jpg',
-      '/images/mercedes-a-class-2.jpg',
-      '/images/mercedes-a-class-3.jpg'
-    ],
-    description: 'Experience luxury and performance with the Mercedes-Benz A-Class. Perfect for business trips and special occasions.',
-    features: ['GPS Navigation', 'Bluetooth', 'Air Conditioning', 'Automatic Transmission', 'Premium Sound System'],
-    included: ['Basic insurance', 'Unlimited mileage', '24/7 customer support', 'Free GPS navigation'],
-    optional: [
-      { name: 'Additional driver', price: 10 },
-      { name: 'Baby seat', price: 5 },
-      { name: 'Full coverage insurance', price: 15 },
-      { name: 'WiFi hotspot', price: 8 }
-    ],
-    agency: {
-      name: 'Premium Car Rental',
-      rating: 4.9,
-      reviews: 156,
-      address: 'Mohammed V Airport, Terminal 1',
-      phone: '+212 6 22 33 44 55',
-      email: 'premium@carrental.ma'
-    },
-    specifications: {
-      engine: '2.0L Turbo',
-      transmission: 'Automatic',
-      fuelType: 'Petrol',
-      seats: 5,
-      luggage: '2 Large + 2 Small',
-      doors: '4 Doors',
-      airConditioning: 'Automatic Climate Control',
-      insurance: 'Basic insurance included',
-      mileage: 'Unlimited',
-      minimumAge: '25 years',
-      drivingLicense: 'Valid for 2+ years',
-      deposit: '3000 MAD'
-    }
-  };
-};
+// This function is replaced by the useEffect in the component
 
 function CarDetailsContent() {
   const params = useParams();
@@ -244,6 +198,8 @@ function CarDetailsContent() {
   const carId = params?.id as string;
   
   const [car, setCar] = useState<CarType | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [bookingData, setBookingData] = useState({
     name: '',
@@ -262,10 +218,71 @@ function CarDetailsContent() {
   const pickupLocation = searchParams?.get('location') || 'Mohammed V Airport';
 
   useEffect(() => {
-    if (carId) {
-      const carData = getCarById(carId);
-      setCar(carData);
-    }
+    const loadCarData = async () => {
+      if (!carId) return;
+      
+      setLoading(true);
+      setError('');
+      
+      try {
+        const carData = await getCarById(carId);
+        
+        if (carData) {
+          // Convert Car type to CarType for component compatibility
+          const convertedCar: CarType = {
+            id: carData.id,
+            make: carData.make,
+            model: carData.model,
+            year: carData.year,
+            category: carData.category,
+            pricePerDay: carData.pricePerDay,
+            images: carData.images || [],
+            description: carData.description || 'No description available.',
+            features: carData.features || [],
+            included: ['Basic insurance', '24/7 support', 'Roadside assistance'],
+            optional: [
+              { name: 'Additional driver', price: 50 },
+              { name: 'GPS navigation', price: 30 },
+              { name: 'Child seat', price: 25 },
+              { name: 'Full coverage insurance', price: 80 }
+            ],
+            agency: {
+              name: carData.agency?.name || 'Car Rental Agency',
+              rating: carData.averageRating || 4.0,
+              reviews: carData.totalBookings || 0,
+              address: carData.location || 'Morocco',
+              phone: '+212 6 00 00 00 00',
+              email: 'contact@agency.com'
+            },
+            specifications: {
+              engine: carData.specifications?.engine || '1.6L',
+              transmission: carData.specifications?.transmission || 'Manual',
+              fuelType: carData.specifications?.fuelType || 'Petrol',
+              seats: carData.specifications?.seats || 5,
+              luggage: `${carData.specifications?.luggage || 2} Large`,
+              doors: `${carData.specifications?.doors || 4} Doors`,
+              airConditioning: carData.features?.includes('Air Conditioning') ? 'Yes' : 'No',
+              insurance: 'Basic insurance included',
+              mileage: '300km free per day',
+              minimumAge: '21 years',
+              drivingLicense: 'Valid for 1+ years',
+              deposit: `${carData.pricePerDay * 2} MAD`
+            }
+          };
+          
+          setCar(convertedCar);
+        } else {
+          setError('Car not found');
+        }
+      } catch (error) {
+        console.error('Error loading car:', error);
+        setError('Failed to load car details. Please try again.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    loadCarData();
   }, [carId]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -307,6 +324,46 @@ function CarDetailsContent() {
     return Math.max(1, Math.ceil((returnD.getTime() - pickup.getTime()) / (1000 * 60 * 60 * 24)));
   };
 
+  // Loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-red-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Loading car details...</h2>
+          <p className="text-gray-600">Please wait while we fetch the car information.</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Car className="w-8 h-8 text-red-600" />
+          </div>
+          <h2 className="text-xl font-semibold text-red-900 mb-2">Failed to load car</h2>
+          <p className="text-red-700 mb-4">{error}</p>
+          <div className="space-x-4">
+            <Button 
+              onClick={() => window.location.reload()}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Try Again
+            </Button>
+            <Link href="/cars">
+              <Button variant="outline">Back to Car Listings</Button>
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Car not found state (after loading completes)
   if (!car) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">

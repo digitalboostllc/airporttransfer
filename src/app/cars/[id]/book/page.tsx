@@ -17,6 +17,7 @@ import { Input } from '@/components/ui/input';
 import { useAuth } from '@/contexts/AuthContext';
 import { createBooking } from '@/lib/bookings';
 import { sendBookingConfirmation } from '@/lib/notifications';
+import { getCarById, type Car } from '@/lib/car-client';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { format, differenceInDays } from 'date-fns';
@@ -40,29 +41,7 @@ const availableExtras: BookingExtras[] = [
   { id: 'delivery', name: 'Car Delivery', price: 150, description: 'To your location', icon: '🚚' }
 ];
 
-// Mock car data - would come from database
-const mockCar = {
-  id: '1',
-  make: 'Renault',
-  model: 'Clio',
-  year: 2023,
-  category: 'economy',
-  pricePerDay: 180,
-  image: '/renault-clio.jpg',
-  agency: {
-    name: 'EuroCar Morocco',
-    rating: 4.5,
-    reviews: 234
-  },
-  specifications: {
-    seats: 5,
-    luggage: 2,
-    transmission: 'Manual',
-    fuelType: 'Petrol'
-  },
-  features: ['GPS', 'Bluetooth', 'USB', 'Air Conditioning'],
-  insurance: 'Basic insurance included'
-};
+// Car data will be loaded from API
 
 export default function BookingPage() {
   const router = useRouter();
@@ -74,6 +53,11 @@ export default function BookingPage() {
   const [step, setStep] = useState(1); // 1: Details, 2: Payment, 3: Confirmation
   const [loading, setLoading] = useState(false);
   const [selectedExtras, setSelectedExtras] = useState<string[]>([]);
+  
+  // Car data state
+  const [car, setCar] = useState<Car | null>(null);
+  const [carLoading, setCarLoading] = useState(true);
+  const [carError, setCarError] = useState('');
   
   // Get booking details from URL
   const pickup_date = searchParams?.get('pickup_date');
@@ -103,6 +87,32 @@ export default function BookingPage() {
     agreeToTerms: false
   });
 
+  // Load car data
+  useEffect(() => {
+    const loadCar = async () => {
+      if (!params.id) return;
+      
+      setCarLoading(true);
+      setCarError('');
+      
+      try {
+        const carData = await getCarById(params.id as string);
+        if (carData) {
+          setCar(carData);
+        } else {
+          setCarError('Car not found');
+        }
+      } catch (error) {
+        console.error('Error loading car:', error);
+        setCarError('Failed to load car details');
+      } finally {
+        setCarLoading(false);
+      }
+    };
+    
+    loadCar();
+  }, [params.id]);
+
   // Redirect if not logged in
   useEffect(() => {
     if (!user) {
@@ -111,7 +121,7 @@ export default function BookingPage() {
   }, [user, router]);
 
   // Calculate prices
-  const basePrice = mockCar.pricePerDay * rentalDays;
+  const basePrice = (car?.pricePerDay || 0) * rentalDays;
   const extrasTotal = selectedExtras.reduce((total, extraId) => {
     const extra = availableExtras.find(e => e.id === extraId);
     return total + (extra?.price || 0);
@@ -207,14 +217,14 @@ export default function BookingPage() {
           createdAt: new Date(),
           updatedAt: new Date(),
           car: {
-            id: mockCar.id,
-            make: mockCar.make,
-            model: mockCar.model,
-            year: mockCar.year,
-            category: mockCar.category,
-            images: [mockCar.image],
+            id: car?.id || params.id as string,
+            make: car?.make || '',
+            model: car?.model || '',
+            year: car?.year || new Date().getFullYear(),
+            category: car?.category || '',
+            images: car?.images || [],
             agency: {
-              name: mockCar.agency.name
+              name: car?.agency?.name || 'Car Rental Agency'
             }
           }
         }, user).catch(error => console.error('Email sending failed:', error));
@@ -244,6 +254,60 @@ export default function BookingPage() {
           >
             Sign In
           </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Show loading state while car data is being fetched
+  if (carLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header variant="page" />
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex items-center justify-center py-16">
+            <div className="text-center">
+              <div className="w-12 h-12 border-4 border-red-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+              <h2 className="text-xl font-semibold text-gray-900 mb-2">Loading car details...</h2>
+              <p className="text-gray-600">Please wait while we fetch the car information.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state if car failed to load
+  if (carError || !car) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header variant="page" />
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex items-center justify-center py-16">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Car className="w-8 h-8 text-red-600" />
+              </div>
+              <h2 className="text-xl font-semibold text-red-900 mb-2">
+                {carError || 'Car not found'}
+              </h2>
+              <p className="text-red-700 mb-4">Unable to load car details for booking.</p>
+              <div className="space-x-4">
+                <Button 
+                  onClick={() => window.location.reload()}
+                  className="bg-red-600 hover:bg-red-700"
+                >
+                  Try Again
+                </Button>
+                <Button 
+                  variant="outline"
+                  onClick={() => router.push('/cars')}
+                >
+                  Back to Cars
+                </Button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     );

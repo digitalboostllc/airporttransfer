@@ -27,6 +27,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { searchCars } from '@/lib/prisma';
 import type { CarSearchParams } from '@/types/database.types';
+import { getCars, type Car } from '@/lib/car-client';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 
@@ -373,6 +374,7 @@ function CarListingContent() {
   const [cars, setCars] = useState<CarDisplay[]>([]);
   const [filteredCars, setFilteredCars] = useState<CarDisplay[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [sortBy, setSortBy] = useState('price_low');
   
   // Filter states
@@ -438,34 +440,57 @@ function CarListingContent() {
   const loadCars = useCallback(async () => {
     try {
       setLoading(true);
+      setError('');
       
-      const searchParams: CarSearchParams = {
-        pickup_datetime: searchFormData.pickupDate ? format(searchFormData.pickupDate, 'yyyy-MM-dd') : urlPickupDate,
-        dropoff_datetime: searchFormData.returnDate ? format(searchFormData.returnDate, 'yyyy-MM-dd') : urlReturnDate,
-          category: searchFormData.carCategory !== 'all' ? (searchFormData.carCategory as CarSearchParams['category']) : undefined,
-          min_price: filters.priceRange[0],
-          max_price: filters.priceRange[1] < 1000 ? filters.priceRange[1] : undefined,
-          transmission: filters.transmission !== 'all' ? (filters.transmission as CarSearchParams['transmission']) : undefined,
-          fuel_type: filters.fuelType !== 'all' ? (filters.fuelType as CarSearchParams['fuel_type']) : undefined,
-          min_seats: filters.seats !== 'all' ? parseInt(filters.seats) : undefined,
-          agency_id: filters.agency !== 'all' ? filters.agency : undefined,
-          sort_by: sortBy === 'price_low' ? 'price_asc' : 
-                   sortBy === 'price_high' ? 'price_desc' :
-                   sortBy === 'rating' ? 'rating' :
-                   sortBy === 'popularity' ? 'popular' : 'price_asc',
-        };
+      // Get filter parameters
+      const searchFilters = {
+        category: filters.category !== 'all' ? filters.category : undefined,
+        available: true, // Only show available cars
+        limit: 50 // Limit results for performance
+      };
 
-      const result = await searchCars(searchParams);
-      setCars(result.cars as unknown as CarDisplay[]);
-      setFilteredCars(result.cars as unknown as CarDisplay[]);
+      // Fetch cars from API
+      const result = await getCars(searchFilters);
+      
+      // Convert Car type to CarDisplay type
+      const displayCars: CarDisplay[] = result.map(car => ({
+        id: car.id,
+        make: car.make,
+        model: car.model,
+        year: car.year,
+        category: car.category,
+        image: car.images[0] || '/placeholder-car.png',
+        pricePerDay: car.pricePerDay,
+        seats: car.specifications?.seats || 5,
+        doors: car.specifications?.doors || 4,
+        luggage: car.specifications?.luggage || 2,
+        transmission: car.specifications?.transmission || 'Manual',
+        fuelType: car.specifications?.fuelType || 'Petrol',
+        airConditioning: car.features?.includes('Air Conditioning') || false,
+        agency: {
+          name: car.agency?.name || 'Unknown Agency',
+          rating: car.averageRating || 0,
+          reviews: car.totalBookings || 0,
+          location: car.location || 'Morocco'
+        },
+        features: car.features || [],
+        available: car.isActive && car.status === 'available',
+        totalPrice: car.pricePerDay * 3, // Example 3-day rental
+        insurance: 'Basic included',
+        freeKmPerDay: 300
+      }));
+      
+      setCars(displayCars);
+      setFilteredCars(displayCars);
     } catch (error) {
       console.error('Error loading cars:', error);
+      setError('Failed to load cars. Please try again.');
       setCars([]);
       setFilteredCars([]);
     } finally {
       setLoading(false);
     }
-  }, [searchFormData, urlPickupDate, urlReturnDate, filters, sortBy]);
+  }, [filters.category]);
 
   useEffect(() => {
     loadCars();
@@ -980,7 +1005,21 @@ function CarListingContent() {
 
         {/* Car Results */}
         <div className="space-y-4">
-          {loading ? (
+          {error ? (
+            <div className="bg-red-50 border border-red-200 rounded-xl p-8 text-center">
+              <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Car className="w-6 h-6 text-red-600" />
+              </div>
+              <h3 className="text-lg font-semibold text-red-900 mb-2">Failed to load cars</h3>
+              <p className="text-red-700 mb-4">{error}</p>
+              <Button 
+                onClick={loadCars}
+                className="bg-red-600 hover:bg-red-700"
+              >
+                Try Again
+              </Button>
+            </div>
+          ) : loading ? (
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center">
               <div className="w-8 h-8 border-2 border-red-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Loading cars...</h3>
@@ -1001,7 +1040,7 @@ function CarListingContent() {
                       <div className="md:col-span-1">
                         <div className="relative">
                           <Image 
-                            src={car.mainImageUrl || car.images?.[0] || '/placeholder-car.png'} 
+                            src={car.image || '/placeholder-car.png'} 
                             alt={`${car.make} ${car.model}`}
                             width={400}
                             height={128}
