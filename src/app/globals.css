@@ -281,20 +281,12 @@ body {
 }
 
 .car-3d-card:hover {
-  transform: translateY(-8px) rotateY(5deg) rotateX(5deg);
-  box-shadow: 
-    0 25px 50px -12px rgba(0, 0, 0, 0.25),
-    0 0 0 1px rgba(255, 90, 95, 0.3);
   border-color: #FF5A5F;
 }
 
 .car-3d-card.selected {
   border-color: #FF5A5F;
   background: linear-gradient(135deg, #FF5A5F05 0%, #FC642D05 100%);
-  transform: translateY(-4px) scale(1.02);
-  box-shadow: 
-    0 20px 25px -5px rgba(255, 90, 95, 0.2),
-    0 0 0 2px #FF5A5F;
 }
 
 .car-3d-icon {
@@ -302,12 +294,7 @@ body {
   transform-style: preserve-3d;
 }
 
-.car-3d-card:hover .car-3d-icon {
-  transform: rotateY(15deg) scale(1.1);
-}
-
 .car-3d-card.selected .car-3d-icon {
-  transform: scale(1.05);
   color: #FF5A5F;
 }
 

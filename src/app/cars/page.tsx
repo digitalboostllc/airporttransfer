@@ -1033,7 +1033,7 @@ function CarListingContent() {
             </div>
           ) : (
             filteredCars.map((car) => (
-              <div key={car.id} className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all duration-300">
+              <div key={car.id} className="bg-white rounded-xl shadow-sm border border-gray-200">
                 <div className="p-6">
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                       {/* Car Image & Basic Info */}
