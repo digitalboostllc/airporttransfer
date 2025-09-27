@@ -308,7 +308,7 @@ export default function Home() {
         ></div>
         
         {/* Background Image - Mobile (Optimized) */}
-        <Image 
+        <Image
           src="/morocco-hero-bg-mobile.jpg" 
           alt="Morocco Landscape" 
           fill
@@ -1004,7 +1004,7 @@ export default function Home() {
             {/* Left Column - Hero Vehicle with Integrated Header */}
             <div className="col-span-7 bg-gradient-to-br from-orange-500 to-red-600 rounded-3xl overflow-hidden shadow-xl group relative">
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent z-10"></div>
-              <Image 
+          <Image
                 src="/mercedes-gle.webp" 
                 alt="Mercedes-Benz GLE" 
                 fill
