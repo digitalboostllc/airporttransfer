@@ -11,7 +11,7 @@ interface TransferLogoProps {
 }
 
 export default function TransferLogo({ 
-  size = 32, 
+  size = 48, 
   showText = true, 
   className = '',
   iconClassName = '',
@@ -28,8 +28,8 @@ export default function TransferLogo({
         style={{ width: size, height: size }}
       >
         <svg 
-          width={size * 0.85} 
-          height={size * 0.85} 
+          width={size * 0.9} 
+          height={size * 0.9} 
           viewBox="0 0 100 100" 
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
@@ -55,7 +55,7 @@ export default function TransferLogo({
       
       {/* Optional Text */}
       {showText && (
-        <span className={`font-bold text-gray-800 tracking-tight ${textClassName}`}>
+        <span className={`font-bold text-gray-800 tracking-wide ${textClassName}`}>
           Venboo
         </span>
       )}

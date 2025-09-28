@@ -75,9 +75,9 @@ export default function LoginPage() {
           <div className="text-center mb-8">
             <Link href="/" className="inline-flex items-center text-white hover:text-orange-200 transition-colors">
               <TransferLogo 
-                size={40} 
+                size={56} 
                 showText={true}
-                textClassName="text-2xl text-white"
+                textClassName="text-3xl font-extrabold text-white"
                 iconClassName="shadow-xl"
               />
             </Link>
