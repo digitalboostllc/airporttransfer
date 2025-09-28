@@ -2,9 +2,11 @@ import Stripe from 'stripe';
 import { loadStripe } from '@stripe/stripe-js';
 
 // Server-side Stripe instance
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-08-27.basil',
-});
+export const stripe = process.env.STRIPE_SECRET_KEY 
+  ? new Stripe(process.env.STRIPE_SECRET_KEY, {
+      apiVersion: '2025-08-27.basil',
+    })
+  : null;
 
 // Client-side Stripe instance
 export const getStripe = () => {
@@ -20,6 +22,9 @@ export async function createPaymentIntent(
   currency: string = 'mad',
   metadata: Record<string, string> = {}
 ): Promise<Stripe.PaymentIntent> {
+  if (!stripe) {
+    throw new Error('Stripe not configured - STRIPE_SECRET_KEY missing');
+  }
   return await stripe.paymentIntents.create({
     amount: Math.round(amount * 100), // Convert to cents
     currency: currency.toLowerCase(),
@@ -34,6 +39,9 @@ export async function createPaymentIntent(
 export async function confirmPaymentIntent(
   paymentIntentId: string
 ): Promise<Stripe.PaymentIntent> {
+  if (!stripe) {
+    throw new Error('Stripe not configured - STRIPE_SECRET_KEY missing');
+  }
   return await stripe.paymentIntents.retrieve(paymentIntentId);
 }
 
@@ -43,6 +51,9 @@ export async function createStripeCustomer(
   name: string,
   metadata: Record<string, string> = {}
 ): Promise<Stripe.Customer> {
+  if (!stripe) {
+    throw new Error('Stripe not configured - STRIPE_SECRET_KEY missing');
+  }
   return await stripe.customers.create({
     email,
     name,
@@ -52,6 +63,9 @@ export async function createStripeCustomer(
 
 // Get customer by email
 export async function getStripeCustomer(email: string): Promise<Stripe.Customer | null> {
+  if (!stripe) {
+    throw new Error('Stripe not configured - STRIPE_SECRET_KEY missing');
+  }
   const customers = await stripe.customers.list({
     email,
     limit: 1,
