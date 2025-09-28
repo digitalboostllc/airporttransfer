@@ -21,8 +21,8 @@ export default function Header({ variant = 'page', className = '' }: HeaderProps
     : "relative z-50 py-4 bg-white border-b border-gray-200";
 
   const containerClasses = variant === 'hero'
-    ? "bg-white/95 backdrop-blur-xl border border-white/20 rounded-2xl shadow-lg px-6 py-3"
-    : "bg-white px-6 py-3";
+    ? `bg-white/95 backdrop-blur-xl border border-white/20 ${isMobileMenuOpen ? 'rounded-t-2xl border-b-0' : 'rounded-2xl'} shadow-lg px-6 py-3`
+    : `bg-white px-6 py-3 ${isMobileMenuOpen ? 'border border-gray-200 rounded-t-2xl border-b-0' : ''}`;
 
   const handleLogout = () => {
     logout();
