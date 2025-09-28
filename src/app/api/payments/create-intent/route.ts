@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
       {
         bookingId: booking.id,
         customerId: decoded.userId,
-        carId: booking.carId,
+        carId: booking.carId || '',
         agencyId: booking.car?.agency?.id || '',
         bookingReference: booking.bookingReference,
       }

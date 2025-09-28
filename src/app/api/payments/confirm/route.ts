@@ -68,26 +68,32 @@ export async function POST(request: NextRequest) {
       // Send enhanced notification emails
       try {
         // Create user object for email notifications
-        const customer = {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const customer: any = {
           id: decoded.userId,
           email: booking.customerEmail,
-          fullName: booking.customerName
+          fullName: booking.customerName,
+          name: booking.customerName,
+          role: 'customer',
+          createdAt: new Date()
         };
 
         // Send payment confirmation email to customer  
-        // @ts-expect-error - Type mismatch due to Prisma include vs base type
-        await sendPaymentConfirmation(booking, customer, {
+        await sendPaymentConfirmation(
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          booking as any, 
+          customer, {
           amount: booking.totalPrice,
           currency: 'MAD',
           paymentMethod: 'Credit Card',
-          transactionId: paymentIntent.id
+          transactionId: paymentIntent.id || 'unknown'
         });
 
         // Send agency notification if agency has email
         if (booking.car?.agency?.email) {
-          // @ts-expect-error - Prisma include result has broader types than base Booking type
           await sendAgencyBookingNotification(
-            booking,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            booking as any,
             booking.car.agency.email,
             'new'
           );

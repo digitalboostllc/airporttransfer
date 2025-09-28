@@ -49,7 +49,7 @@ export default function BookingPage() {
   const router = useRouter();
   const params = useParams();
   const searchParams = useSearchParams();
-  const { user } = useAuth();
+  const { user, token } = useAuth();
 
   // Booking state
   const [step, setStep] = useState(1); // 1: Details, 2: Review, 3: Payment, 4: Confirmation
@@ -213,7 +213,7 @@ export default function BookingPage() {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${user.token}`,
+                'Authorization': `Bearer ${token}`,
               },
               body: JSON.stringify({
                 bookingId: bookingResult.bookingId,
@@ -258,7 +258,7 @@ export default function BookingPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${user.token}`,
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({
           paymentIntentId: clientSecret.split('_secret_')[0], // Extract payment intent ID

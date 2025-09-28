@@ -61,7 +61,7 @@ export async function getAgencyStats(agencyId: string): Promise<AgencyStats> {
     const activeBookings = await prisma.booking.count({
       where: { 
         car: { agencyId },
-        status: { in: ['confirmed', 'in_progress'] }
+        status: { in: ['confirmed', 'active'] }
       }
     });
 
@@ -201,15 +201,15 @@ export async function getAgencyCars(agencyId: string): Promise<AgencyCar[]> {
         model: car.model,
         year: car.year,
         category: car.category,
-        pricePerDay: car.pricePerDay,
+        pricePerDay: car.basePricePerDay,
         status: car.status,
         totalBookings: car._count.bookings,
         totalRevenue,
         averageRating: Math.round(averageRating * 10) / 10,
-        images: car.images || [],
-        location: car.location || '',
-        features: car.features || [],
-        isActive: car.isActive,
+        images: Array.isArray(car.images) ? car.images : (car.images ? JSON.parse(car.images as string) : []),
+        location: '', // Location is handled at agency level
+        features: Array.isArray(car.features) ? car.features : (car.features ? JSON.parse(car.features as string) : []),
+        isActive: car.isFeatured, // Use isFeatured field as isActive equivalent
         createdAt: car.createdAt,
         updatedAt: car.updatedAt
       };
@@ -239,7 +239,7 @@ export async function getAgencyByUserId(userId: string) {
 export async function updateBookingStatus(
   bookingId: string, 
   agencyId: string, 
-  status: 'confirmed' | 'cancelled' | 'completed' | 'in_progress'
+  status: 'confirmed' | 'cancelled' | 'completed' | 'active'
 ): Promise<{ success: boolean; error?: string }> {
   try {
     // Verify booking belongs to this agency

@@ -102,7 +102,7 @@ export class FinancialReportService {
     ]);
 
     const totalRevenue = revenueData._sum.totalPrice || 0;
-    const totalBookings = revenueData._count || 0;
+    const totalBookings = revenueData._count?.id || 0;
     const totalCommission = totalRevenue * this.COMMISSION_RATE;
     
     const completedBookings = bookingStats.find(s => s.status === 'completed')?._count.id || 0;

@@ -100,11 +100,11 @@ export default function CarManagementModal({
         location: car.location || '',
         description: car.description || '',
         specifications: {
-          seats: car.specifications?.seats || 5,
-          luggage: car.specifications?.luggage || 2,
-          transmission: car.specifications?.transmission || 'Manual',
-          fuelType: car.specifications?.fuelType || 'Petrol',
-          engine: car.specifications?.engine || ''
+          seats: Number(car.specifications?.seats) || 5,
+          luggage: Number(car.specifications?.luggage) || 2,
+          transmission: String(car.specifications?.transmission) || 'Manual',
+          fuelType: String(car.specifications?.fuelType) || 'Petrol',
+          engine: String(car.specifications?.engine) || ''
         }
       });
     } else {

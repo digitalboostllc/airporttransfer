@@ -49,7 +49,7 @@ class EmailService {
     }
 
     if (this.config.provider === 'smtp' && this.config.smtp) {
-      this.transporter = nodemailer.createTransporter({
+      this.transporter = nodemailer.createTransport({
         host: this.config.smtp.host,
         port: this.config.smtp.port,
         secure: this.config.smtp.secure,
@@ -60,7 +60,7 @@ class EmailService {
       });
     } else if (this.config.provider === 'sendgrid' && this.config.sendgrid) {
       // SendGrid with nodemailer
-      this.transporter = nodemailer.createTransporter({
+      this.transporter = nodemailer.createTransport({
         service: 'SendGrid',
         auth: {
           user: 'apikey',
