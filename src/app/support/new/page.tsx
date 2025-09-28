@@ -226,7 +226,7 @@ export default function NewTicketPage() {
             </Link>
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Create Support Ticket</h1>
-              <p className="text-gray-600 mt-2">Describe your issue and we'll help you resolve it</p>
+              <p className="text-gray-600 mt-2">Describe your issue and we&apos;ll help you resolve it</p>
             </div>
           </div>
 

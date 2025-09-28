@@ -435,7 +435,7 @@ export const sendBookingConfirmation = (booking: Booking, customer: User) =>
 export const sendBookingStatusUpdate = (booking: Booking, customer: User, newStatus: string, message?: string) =>
   emailNotificationService.sendBookingStatusUpdate(booking, customer, newStatus, message);
 
-export const sendPaymentConfirmation = (booking: Booking, customer: User, paymentDetails: any) =>
+export const sendPaymentConfirmation = (booking: Booking, customer: User, paymentDetails: { amount: number; currency: string; paymentMethod: string; transactionId?: string }) =>
   emailNotificationService.sendPaymentConfirmation(booking, customer, paymentDetails);
 
 export const sendBookingReminder = (booking: Booking, customer: User, reminderType: 'pickup' | 'return' | 'review') =>

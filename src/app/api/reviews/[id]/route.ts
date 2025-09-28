@@ -123,7 +123,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     }
 
     // Build update data
-    const updateData: any = {};
+    const updateData: Record<string, unknown> = {};
     
     if (decoded.role === 'customer' || decoded.role === 'admin') {
       if (rating !== undefined) {

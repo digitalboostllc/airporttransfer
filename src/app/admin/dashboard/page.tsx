@@ -47,7 +47,7 @@ import {
 
 function AdminDashboardPage() {
   const router = useRouter();
-  const { hasAccess, user } = useRequireAuth('admin');
+  const { hasAccess, user, token } = useRequireAuth('admin');
   const [activeTab, setActiveTab] = useState('overview');
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');

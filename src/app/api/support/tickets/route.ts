@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyToken } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
-import { SupportTicketCategory, SupportTicketPriority, UserRole } from '@prisma/client';
+import { SupportTicketCategory, SupportTicketPriority } from '@prisma/client';
 
 // Generate unique ticket number
 function generateTicketNumber(): string {
@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '10');
 
     // Build where clause based on user role
-    let whereClause: any = {};
+    const whereClause: Record<string, unknown> = {};
     
     // Non-admin users can only see their own tickets
     if (decoded.role !== 'admin') {

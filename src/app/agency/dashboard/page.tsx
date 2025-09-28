@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { 
-  Car, 
+  Car as CarIcon, 
   Plus, 
   Calendar, 
   DollarSign, 
@@ -32,6 +32,7 @@ import {
   type AgencyDashboardData,
   type AgencyCar
 } from '@/lib/agency-client';
+import { type Car } from '@/lib/car-client';
 import { deleteCar, toggleCarStatus } from '@/lib/car-client';
 import CarManagementModal from '@/components/CarManagementModal';
 import BookingCalendar from '@/components/BookingCalendar';
@@ -168,7 +169,7 @@ function AgencyDashboardPage() {
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
           <div className="mb-4">
-            <Car className="w-16 h-16 text-red-500 mx-auto mb-4" />
+            <CarIcon className="w-16 h-16 text-red-500 mx-auto mb-4" />
             <h2 className="text-2xl font-bold text-gray-900 mb-2">Agency Access Required</h2>
             <p className="text-gray-600 mb-6">You need an agency account to access this dashboard.</p>
             <Button 
@@ -221,7 +222,7 @@ function AgencyDashboardPage() {
               </p>
             </div>
             <div className="bg-white/20 backdrop-blur-sm rounded-full p-4">
-              <Car className="w-12 h-12" />
+              <CarIcon className="w-12 h-12" />
             </div>
           </div>
         </div>
@@ -253,7 +254,7 @@ function AgencyDashboardPage() {
                       : "text-gray-600 hover:bg-gray-50"
                   )}
                 >
-                  <Car className="w-5 h-5 mr-3" />
+                  <CarIcon className="w-5 h-5 mr-3" />
                   Fleet Management
                 </button>
                 
@@ -328,7 +329,7 @@ function AgencyDashboardPage() {
                     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                       <div className="flex items-center">
                         <div className="bg-blue-100 rounded-lg p-3 mr-4">
-                          <Car className="w-6 h-6 text-blue-600" />
+                          <CarIcon className="w-6 h-6 text-blue-600" />
                         </div>
                         <div>
                           <p className="text-sm text-gray-600">Total Cars</p>
@@ -444,7 +445,7 @@ function AgencyDashboardPage() {
                 {/* Cars Grid */}
                 {filteredCars.length === 0 ? (
                   <div className="text-center py-12 text-gray-500">
-                    <Car className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+                    <CarIcon className="w-16 h-16 mx-auto mb-4 text-gray-300" />
                     <p className="text-lg font-medium">No cars in your fleet yet</p>
                     <p className="mb-6">Add your first car to start accepting bookings</p>
                     <Button 
@@ -699,9 +700,9 @@ function AgencyDashboardPage() {
                         customerPhone: booking.customerPhone,
                         pickupDatetime: booking.pickupDatetime.toISOString(),
                         dropoffDatetime: booking.dropoffDatetime.toISOString(),
-                        status: booking.status,
+                        status: booking.status as 'pending' | 'confirmed' | 'active' | 'completed' | 'cancelled',
                         totalPrice: booking.totalPrice,
-                        carId: booking.carId || '',
+                        carId: '', // Not available from agency booking data
                         carMake: booking.carMake,
                         carModel: booking.carModel,
                         carYear: booking.carYear,
@@ -793,7 +794,7 @@ function AgencyDashboardPage() {
           isOpen={carModalOpen}
           onClose={handleCarModalClose}
           onSuccess={handleCarModalSuccess}
-          car={editingCar}
+          car={editingCar as Car | null}
           token={token}
         />
       )}

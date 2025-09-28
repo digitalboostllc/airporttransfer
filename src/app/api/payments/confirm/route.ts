@@ -65,31 +65,33 @@ export async function POST(request: NextRequest) {
       }
     });
 
-    // Send enhanced notification emails
-    try {
-      // Create user object for email notifications
-      const customer = {
-        id: decoded.userId,
-        email: booking.customerEmail,
-        name: booking.customerName
-      };
+      // Send enhanced notification emails
+      try {
+        // Create user object for email notifications
+        const customer = {
+          id: decoded.userId,
+          email: booking.customerEmail,
+          fullName: booking.customerName
+        };
 
-      // Send payment confirmation email to customer
-      await sendPaymentConfirmation(booking as any, customer as any, {
-        amount: booking.totalPrice,
-        currency: 'MAD',
-        paymentMethod: 'Credit Card',
-        transactionId: paymentIntent.id
-      });
+        // Send payment confirmation email to customer  
+        // @ts-expect-error - Type mismatch due to Prisma include vs base type
+        await sendPaymentConfirmation(booking, customer, {
+          amount: booking.totalPrice,
+          currency: 'MAD',
+          paymentMethod: 'Credit Card',
+          transactionId: paymentIntent.id
+        });
 
-      // Send agency notification if agency has contact email
-      if (booking.car?.agency?.contactEmail) {
-        await sendAgencyBookingNotification(
-          booking as any,
-          booking.car.agency.contactEmail,
-          'new'
-        );
-      }
+        // Send agency notification if agency has email
+        if (booking.car?.agency?.email) {
+          // @ts-expect-error - Type mismatch due to Prisma include vs base type
+          await sendAgencyBookingNotification(
+            booking,
+            booking.car.agency.email,
+            'new'
+          );
+        }
 
     } catch (emailError) {
       console.error('Email sending error:', emailError);

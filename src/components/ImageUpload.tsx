@@ -66,7 +66,7 @@ export default function ImageUpload({
     }
 
     const validFiles: File[] = [];
-    let errorMessages: string[] = [];
+    const errorMessages: string[] = [];
 
     Array.from(files).forEach(file => {
       const error = validateFile(file);

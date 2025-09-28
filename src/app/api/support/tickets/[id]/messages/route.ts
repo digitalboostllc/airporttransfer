@@ -2,14 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyToken } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
-interface RouteParams {
-  params: {
-    id: string;
-  };
-}
-
 // GET /api/support/tickets/[id]/messages - Get messages for a ticket
-export async function GET(request: NextRequest, { params }: RouteParams) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const token = request.headers.get('Authorization')?.split(' ')[1];
     if (!token) {
@@ -21,7 +15,8 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    const ticketId = params.id;
+    const resolvedParams = await params;
+    const ticketId = resolvedParams.id;
 
     // Check if ticket exists and user has permission
     const ticket = await prisma.supportTicket.findUnique({
@@ -64,7 +59,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 }
 
 // POST /api/support/tickets/[id]/messages - Add message to ticket
-export async function POST(request: NextRequest, { params }: RouteParams) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const token = request.headers.get('Authorization')?.split(' ')[1];
     if (!token) {
@@ -76,7 +71,8 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    const ticketId = params.id;
+    const resolvedParams = await params;
+    const ticketId = resolvedParams.id;
     const { message, attachments = [], isInternal = false } = await request.json();
 
     if (!message || message.trim().length === 0) {
@@ -123,7 +119,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     });
 
     // Update ticket status if needed
-    let ticketUpdates: any = {};
+    const ticketUpdates: Record<string, unknown> = {};
     
     // If customer sends a message, set status to 'open' if it was 'waiting_customer'
     if (ticket.userId === decoded.userId && ticket.status === 'waiting_customer') {

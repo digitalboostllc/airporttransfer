@@ -3,14 +3,8 @@ import { verifyToken } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { SupportTicketStatus, SupportTicketPriority } from '@prisma/client';
 
-interface RouteParams {
-  params: {
-    id: string;
-  };
-}
-
 // GET /api/support/tickets/[id] - Get specific ticket with messages
-export async function GET(request: NextRequest, { params }: RouteParams) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const token = request.headers.get('Authorization')?.split(' ')[1];
     if (!token) {
@@ -22,7 +16,8 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    const ticketId = params.id;
+    const resolvedParams = await params;
+    const ticketId = resolvedParams.id;
 
     const ticket = await prisma.supportTicket.findUnique({
       where: { id: ticketId },
@@ -68,7 +63,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 }
 
 // PATCH /api/support/tickets/[id] - Update ticket (status, priority, assignment, etc.)
-export async function PATCH(request: NextRequest, { params }: RouteParams) {
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const token = request.headers.get('Authorization')?.split(' ')[1];
     if (!token) {
@@ -80,7 +75,8 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    const ticketId = params.id;
+    const resolvedParams = await params;
+    const ticketId = resolvedParams.id;
     const updates = await request.json();
 
     const ticket = await prisma.supportTicket.findUnique({
@@ -99,7 +95,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     }
 
     // Validate update data
-    const allowedUpdates: any = {};
+    const allowedUpdates: Record<string, unknown> = {};
 
     // Only admins can update certain fields
     if (decoded.role === 'admin') {
@@ -174,7 +170,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 }
 
 // DELETE /api/support/tickets/[id] - Delete ticket (admin only)
-export async function DELETE(request: NextRequest, { params }: RouteParams) {
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const token = request.headers.get('Authorization')?.split(' ')[1];
     if (!token) {
@@ -186,7 +182,8 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    const ticketId = params.id;
+    const resolvedParams = await params;
+    const ticketId = resolvedParams.id;
 
     const ticket = await prisma.supportTicket.findUnique({
       where: { id: ticketId },

@@ -1,6 +1,4 @@
 import nodemailer from 'nodemailer';
-import { readFileSync } from 'fs';
-import path from 'path';
 
 export interface EmailTemplate {
   to: string | string[];
@@ -263,7 +261,7 @@ export class EmailTemplateBuilder {
 // Initialize email service based on environment
 export const getEmailService = (): EmailService => {
   const config: EmailConfig = {
-    provider: (process.env.EMAIL_PROVIDER as any) || 'mock',
+    provider: (process.env.EMAIL_PROVIDER as 'mock' | 'smtp' | 'sendgrid') || 'mock',
     defaultFrom: process.env.EMAIL_FROM || 'Venboo <noreply@venboo.com>',
     defaultReplyTo: process.env.EMAIL_REPLY_TO || 'support@venboo.com',
     smtp: process.env.SMTP_HOST ? {
