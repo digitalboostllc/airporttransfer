@@ -626,9 +626,9 @@ function CarListingContent() {
                     <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
+                <PopoverContent className="w-[95vw] max-w-[700px] p-0" align="start">
                   <div className="p-4">
-                    <div className="grid grid-cols-2 gap-4 mb-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">Pickup Date</label>
                         <Calendar
@@ -652,7 +652,7 @@ function CarListingContent() {
                         />
                       </div>
                     </div>
-                    <div className="grid grid-cols-2 gap-4 pt-4 border-t">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">Pickup time</label>
                         <Select value={searchFormData.pickupTime} onValueChange={(value) => handleSearchFormChange('pickupTime', value)}>
@@ -740,7 +740,7 @@ function CarListingContent() {
                     <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-[600px] p-0" align="end">
+                <PopoverContent className="w-[95vw] max-w-[600px] p-0" align="end">
                   <div className="p-6 space-y-4">
                     <div className="flex items-center justify-between">
                       <h3 className="font-semibold text-gray-900">Filters</h3>
@@ -764,8 +764,8 @@ function CarListingContent() {
                       </Button>
                     </div>
 
-                    {/* Two Column Layout */}
-                    <div className="grid grid-cols-2 gap-6">
+                    {/* Responsive Column Layout */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                       {/* Left Column */}
                       <div className="space-y-4">
                         {/* Price Range */}

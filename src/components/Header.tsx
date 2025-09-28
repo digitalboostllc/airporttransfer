@@ -1,7 +1,7 @@
 'use client';
 
-import React from 'react';
-import { Phone, User, LogOut, Settings } from 'lucide-react';
+import React, { useState } from 'react';
+import { Phone, User, LogOut, Settings, Menu, X } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
@@ -14,6 +14,7 @@ interface HeaderProps {
 
 export default function Header({ variant = 'page', className = '' }: HeaderProps) {
   const { user, logout } = useAuth();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const headerClasses = variant === 'hero' 
     ? "relative z-50 pt-4 pb-4"
@@ -40,10 +41,8 @@ export default function Header({ variant = 'page', className = '' }: HeaderProps
               </div>
             </Link>
             
+            {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center space-x-4">
-              <Link href="/" className="px-3 py-1.5 rounded-lg hover:bg-gray-100 text-gray-700 hover:text-red-500 transition-all duration-300 text-sm font-medium">
-                Home
-              </Link>
               <Link href="/cars" className="px-3 py-1.5 rounded-lg hover:bg-gray-100 text-gray-700 hover:text-red-500 transition-all duration-300 text-sm font-medium">
                 Car Rental
               </Link>
@@ -59,24 +58,18 @@ export default function Header({ variant = 'page', className = '' }: HeaderProps
             </nav>
             
             <div className="flex items-center space-x-2 sm:space-x-3">
-              {/* Mobile menu links - visible only on small screens */}
-              <div className="md:hidden flex items-center space-x-1">
-                <Link href="/" className="px-2 py-1 text-xs font-medium text-gray-700 hover:text-red-500 transition-colors">
-                  Home
-                </Link>
-                <span className="text-gray-300">•</span>
-                <Link href="/cars" className="px-2 py-1 text-xs font-medium text-gray-700 hover:text-red-500 transition-colors">
-                  Cars
-                </Link>
-                <span className="text-gray-300">•</span>
-                <Link href="/#services" className="px-2 py-1 text-xs font-medium text-gray-700 hover:text-red-500 transition-colors">
-                  Services
-                </Link>
-                <span className="text-gray-300">•</span>
-                <Link href="/#about" className="px-2 py-1 text-xs font-medium text-gray-700 hover:text-red-500 transition-colors">
-                  About
-                </Link>
-              </div>
+              {/* Mobile Menu Button */}
+              <button
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className="md:hidden w-9 h-9 bg-gray-100 hover:bg-gray-200 rounded-lg flex items-center justify-center transition-all duration-300 border border-gray-200"
+                aria-label="Toggle menu"
+              >
+                {isMobileMenuOpen ? (
+                  <X className="w-4 h-4 text-gray-600" />
+                ) : (
+                  <Menu className="w-4 h-4 text-gray-600" />
+                )}
+              </button>
               
               {/* Authentication Section */}
               {user ? (
@@ -181,6 +174,77 @@ export default function Header({ variant = 'page', className = '' }: HeaderProps
           </div>
         </div>
       </div>
+
+      {/* Mobile Menu Dropdown */}
+      {isMobileMenuOpen && (
+        <div className="md:hidden absolute top-full left-0 right-0 bg-white border-b border-gray-200 shadow-lg z-40">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="py-4 space-y-3">
+              <Link 
+                href="/cars" 
+                className="block px-4 py-3 text-gray-700 hover:text-red-500 hover:bg-gray-50 rounded-lg transition-all duration-200 text-sm font-medium"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Car Rental
+              </Link>
+              <Link 
+                href="/#services" 
+                className="block px-4 py-3 text-gray-700 hover:text-red-500 hover:bg-gray-50 rounded-lg transition-all duration-200 text-sm font-medium"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Services
+              </Link>
+              <Link 
+                href="/#about" 
+                className="block px-4 py-3 text-gray-700 hover:text-red-500 hover:bg-gray-50 rounded-lg transition-all duration-200 text-sm font-medium"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                About
+              </Link>
+              <Link 
+                href="/#contact" 
+                className="block px-4 py-3 text-gray-700 hover:text-red-500 hover:bg-gray-50 rounded-lg transition-all duration-200 text-sm font-medium"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Contact
+              </Link>
+              
+              {/* User menu items for mobile */}
+              {user && (
+                <>
+                  <div className="border-t border-gray-200 pt-3 mt-3">
+                    <Link 
+                      href="/support" 
+                      className="block px-4 py-3 text-blue-700 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-all duration-200 text-sm font-medium"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      Help & Support
+                    </Link>
+                    {user.role === 'admin' && (
+                      <Link 
+                        href="/admin/dashboard" 
+                        className="block px-4 py-3 text-purple-700 hover:text-purple-500 hover:bg-purple-50 rounded-lg transition-all duration-200 text-sm font-medium"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        Admin Panel
+                      </Link>
+                    )}
+                    {user.role === 'agency_owner' && (
+                      <Link 
+                        href="/agency/dashboard" 
+                        className="block px-4 py-3 text-orange-700 hover:text-orange-500 hover:bg-orange-50 rounded-lg transition-all duration-200 text-sm font-medium"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        Dashboard
+                      </Link>
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 }

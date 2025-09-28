@@ -324,6 +324,100 @@ export default function Home() {
         {/* Hero Content */}
         <div className="flex-1 flex items-center py-8 lg:py-0">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          
+          {/* Mobile-Only: Title, Description, Stats & Features (shown before form) */}
+          <div className="lg:hidden mb-6 text-center">
+            <div className="inline-flex items-center bg-white/20 backdrop-filter backdrop-blur-sm px-3 py-1 rounded-full mb-3 border border-white/30">
+              {activeService === 'transfer' ? (
+                <>
+                  <Plane className="w-4 h-4 mr-2 text-white" />
+                  <span className="text-xs font-medium text-white">Mohammed V Airport Transfer</span>
+                </>
+              ) : (
+                <>
+                  <Car className="w-4 h-4 mr-2 text-white" />
+                  <span className="text-xs font-medium text-white">Car Rental Marketplace</span>
+                </>
+              )}
+            </div>
+            
+            <h1 className="text-4xl md:text-5xl font-bold mb-4 leading-tight text-white">
+              {activeService === 'transfer' ? 'Airport Transfer' : 'Car Rental'}
+            </h1>
+            
+            <p className="text-sm mb-4 text-white/90 max-w-md mx-auto leading-relaxed">
+              {activeService === 'transfer' 
+                ? 'Professional airport transfer service with smart location suggestions. Use the swap button to switch pickup and destination effortlessly.'
+                : 'Find and rent cars from trusted agencies across Morocco. Compare prices, choose your perfect vehicle, and book instantly.'
+              }
+            </p>
+
+            {/* Trust Indicators - Mobile */}
+            <div className="flex items-center justify-center gap-4 mb-4 text-xs text-white/80">
+              <div className="flex items-center gap-1">
+                <CheckCircle className="w-3 h-3 text-green-400" />
+                <span>50+ Partner Agencies</span>
+              </div>
+              <div className="w-px h-3 bg-white/30"></div>
+              <div className="flex items-center gap-1">
+                <Star className="w-3 h-3 text-yellow-400" />
+                <span>10K+ Happy Customers</span>
+              </div>
+              <div className="w-px h-3 bg-white/30"></div>
+              <div className="flex items-center gap-1">
+                <Building2 className="w-3 h-3 text-blue-400" />
+                <span>Licensed Platform</span>
+              </div>
+            </div>
+        
+            {/* Features Grid - Mobile */}
+            <div className="grid grid-cols-3 gap-4 max-w-md mx-auto mb-6">
+              {activeService === 'transfer' ? (
+                <>
+                  <div className="flex flex-col items-center text-xs text-white">
+                    <div className="w-8 h-8 bg-gradient-to-br from-white/30 to-white/10 rounded-full mb-2 flex items-center justify-center border border-white/20">
+                      <Clock className="w-4 h-4 text-white" />
+                    </div>
+                    <span className="font-semibold">24/7 Available</span>
+                  </div>
+                  <div className="flex flex-col items-center text-xs text-white">
+                    <div className="w-8 h-8 bg-gradient-to-br from-white/30 to-white/10 rounded-full mb-2 flex items-center justify-center border border-white/20">
+                      <Target className="w-4 h-4 text-white" />
+                    </div>
+                    <span className="font-semibold">Licensed Drivers</span>
+                  </div>
+                  <div className="flex flex-col items-center text-xs text-white">
+                    <div className="w-8 h-8 bg-gradient-to-br from-white/30 to-white/10 rounded-full mb-2 flex items-center justify-center border border-white/20">
+                      <DollarSign className="w-4 h-4 text-white" />
+                    </div>
+                    <span className="font-semibold">Smart Pricing</span>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="flex flex-col items-center text-xs text-white">
+                    <div className="w-8 h-8 bg-gradient-to-br from-white/30 to-white/10 rounded-full mb-2 flex items-center justify-center border border-white/20">
+                      <Building2 className="w-4 h-4 text-white" />
+                    </div>
+                    <span className="font-semibold">Top Agencies</span>
+                  </div>
+                  <div className="flex flex-col items-center text-xs text-white">
+                    <div className="w-8 h-8 bg-gradient-to-br from-white/30 to-white/10 rounded-full mb-2 flex items-center justify-center border border-white/20">
+                      <Star className="w-4 h-4 text-white" />
+                    </div>
+                    <span className="font-semibold">Best Prices</span>
+                  </div>
+                  <div className="flex flex-col items-center text-xs text-white">
+                    <div className="w-8 h-8 bg-gradient-to-br from-white/30 to-white/10 rounded-full mb-2 flex items-center justify-center border border-white/20">
+                      <CheckCircle className="w-4 h-4 text-white" />
+                    </div>
+                    <span className="font-semibold">Instant Booking</span>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+          
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 items-center lg:items-end">
             {/* Left: Compact Premium Booking Form */}
             <div className="compact-form rounded-2xl p-3 sm:p-4">
@@ -855,8 +949,8 @@ export default function Home() {
               )}
             </div>
 
-            {/* Right: Content + Interactive Map */}
-            <div>
+            {/* Right: Content + Interactive Map (Desktop Only) */}
+            <div className="hidden lg:block">
               {/* Content Before Map */}
                   <div className="mb-4 text-center">
                     <div className="inline-flex items-center bg-white/20 backdrop-filter backdrop-blur-sm px-3 py-1 rounded-full mb-3 border border-white/30">
