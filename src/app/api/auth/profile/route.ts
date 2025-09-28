@@ -26,7 +26,7 @@ export async function PUT(request: NextRequest) {
         role: string;
         agencyId?: string;
       };
-    } catch (_error) {
+    } catch {
       return NextResponse.json(
         { error: 'Invalid token' },
         { status: 401 }

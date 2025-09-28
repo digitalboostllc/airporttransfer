@@ -5,11 +5,9 @@ import {
   TrendingUp,
   DollarSign,
   Calendar,
-  Users,
   Car,
   Activity,
   BarChart3,
-  PieChart,
   Download,
   Filter,
   RefreshCw,
@@ -103,12 +101,10 @@ const MetricCard = ({
 
 const SimpleChart = ({ 
   data, 
-  title, 
-  type = 'line' 
+  title 
 }: { 
   data: TimeSeriesData[]; 
   title: string; 
-  type?: 'line' | 'bar' 
 }) => {
   if (!data.length) {
     return (
@@ -199,7 +195,7 @@ export default function FinancialReports({ token, className = '' }: FinancialRep
 
   useEffect(() => {
     loadReports();
-  }, [period, token]);
+  }, [period, token, loadReports]);
 
   const formatCurrency = (value: number) => `${value.toLocaleString()} MAD`;
   const formatPercentage = (value: number) => `${value.toFixed(1)}%`;
@@ -353,7 +349,7 @@ export default function FinancialReports({ token, className = '' }: FinancialRep
               </tr>
             </thead>
             <tbody>
-              {agencies.map((agency, index) => (
+              {agencies.map((agency) => (
                 <tr key={agency.agencyId} className="border-b border-gray-100 hover:bg-gray-50">
                   <td className="py-3 px-4">
                     <div className="font-medium text-gray-900">{agency.agencyName}</div>

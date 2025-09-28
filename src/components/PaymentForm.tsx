@@ -37,7 +37,6 @@ function CheckoutForm({ amount, currency = 'MAD', bookingReference, onSuccess, o
   const elements = useElements();
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
-  const [isComplete, setIsComplete] = useState(false);
 
   useEffect(() => {
     if (!stripe) return;
@@ -131,7 +130,6 @@ function CheckoutForm({ amount, currency = 'MAD', bookingReference, onSuccess, o
           <div className="mb-6">
             <PaymentElement 
               options={paymentElementOptions}
-              onReady={() => setIsComplete(true)}
             />
           </div>
 

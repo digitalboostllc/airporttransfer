@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { ArrowLeft, Lock, Eye, EyeOff, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,7 +10,6 @@ import Footer from '@/components/Footer';
 import Link from 'next/link';
 
 function ResetPasswordContent() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get('token');
 
@@ -44,8 +43,8 @@ function ResetPasswordContent() {
         } else {
           setError(data.error || 'Invalid or expired reset token');
         }
-      } catch (error) {
-        setError('Failed to verify reset token');
+      } catch {
+        console.error('Failed to verify reset token');
       } finally {
         setTokenLoading(false);
       }
@@ -91,7 +90,7 @@ function ResetPasswordContent() {
       } else {
         setError(data.error || 'Failed to reset password');
       }
-    } catch (error) {
+    } catch {
       setError('An error occurred. Please try again.');
     } finally {
       setLoading(false);

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -21,7 +21,6 @@ import {
   Car,
   Bug,
   User,
-  MessageCircle,
   Wrench,
   MoreHorizontal
 } from 'lucide-react';
@@ -74,13 +73,7 @@ export default function NewTicketPage() {
   const [error, setError] = useState<string>('');
   const [success, setSuccess] = useState<string>('');
 
-  useEffect(() => {
-    if (token) {
-      loadBookings();
-    }
-  }, [token]);
-
-  const loadBookings = async () => {
+  const loadBookings = useCallback(async () => {
     if (!token) return;
 
     try {
@@ -97,7 +90,13 @@ export default function NewTicketPage() {
     } catch (err) {
       console.error('Error loading bookings:', err);
     }
-  };
+  }, [token]);
+
+  useEffect(() => {
+    if (token) {
+      loadBookings();
+    }
+  }, [token, loadBookings]);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));

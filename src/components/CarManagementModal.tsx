@@ -3,13 +3,11 @@
 import React, { useState, useEffect } from 'react';
 import { 
   X, 
-  Trash2, 
   Plus, 
   Car as CarIcon, 
   Loader2,
   AlertCircle,
-  CheckCircle,
-  Image as ImageIcon
+  CheckCircle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -23,7 +21,6 @@ import {
   CAR_MAKES,
   CAR_FEATURES
 } from '@/lib/car-client';
-import { type AgencyCar } from '@/lib/agency-client';
 
 interface CarManagementModalProps {
   isOpen: boolean;
@@ -83,7 +80,6 @@ export default function CarManagementModal({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const [newImageUrl, setNewImageUrl] = useState('');
   const [newFeature, setNewFeature] = useState('');
 
   // Load car data for editing
@@ -147,18 +143,6 @@ export default function CarManagementModal({
     }));
   };
 
-  // Handle image management
-  const addImage = () => {
-    if (newImageUrl && !formData.images.includes(newImageUrl)) {
-      handleInputChange('images', [...formData.images, newImageUrl]);
-      setNewImageUrl('');
-    }
-  };
-
-  const removeImage = (index: number) => {
-    const newImages = formData.images.filter((_, i) => i !== index);
-    handleInputChange('images', newImages);
-  };
 
   // Handle feature management
   const addFeature = (feature: string) => {

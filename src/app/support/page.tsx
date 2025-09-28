@@ -1,11 +1,10 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   Plus, 
   MessageCircle, 
@@ -14,15 +13,14 @@ import {
   CheckCircle, 
   AlertCircle, 
   XCircle,
-  Search,
-  Filter
+  Search
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import Link from 'next/link';
-import { formatDistanceToNow, format } from 'date-fns';
+import { formatDistanceToNow } from 'date-fns';
 
 interface SupportTicket {
   id: string;
@@ -107,18 +105,11 @@ export default function SupportPage() {
   const [tickets, setTickets] = useState<SupportTicket[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>('');
-  const [activeTab, setActiveTab] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [categoryFilter, setCategoryFilter] = useState('all');
 
-  useEffect(() => {
-    if (token) {
-      loadTickets();
-    }
-  }, [token, statusFilter, categoryFilter]);
-
-  const loadTickets = async () => {
+  const loadTickets = useCallback(async () => {
     if (!token) return;
 
     try {
@@ -148,7 +139,13 @@ export default function SupportPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [token, statusFilter, categoryFilter]);
+
+  useEffect(() => {
+    if (token) {
+      loadTickets();
+    }
+  }, [token, statusFilter, categoryFilter, loadTickets]);
 
   const filteredTickets = tickets.filter(ticket =>
     searchTerm === '' || 

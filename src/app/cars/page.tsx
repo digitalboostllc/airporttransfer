@@ -25,7 +25,7 @@ import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import Link from 'next/link';
 import Image from 'next/image';
-import { getCars, type Car } from '@/lib/car-client';
+import { getCars } from '@/lib/car-client';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 

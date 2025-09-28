@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
         userId: string;
         role: string;
       };
-    } catch (_error) {
+    } catch {
       return NextResponse.json(
         { error: 'Invalid token' },
         { status: 401 }

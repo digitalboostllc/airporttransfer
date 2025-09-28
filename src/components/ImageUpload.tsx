@@ -110,7 +110,7 @@ export default function ImageUpload({
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       handleFiles(e.dataTransfer.files);
     }
-  }, [images.length, maxImages]);
+  }, [handleFiles, images.length, maxImages]);
 
   const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     e.preventDefault();
@@ -147,7 +147,7 @@ export default function ImageUpload({
       setUrlInput('');
       setShowUrlInput(false);
       setUploadError('');
-    } catch (error) {
+    } catch {
       setUploadError('Please enter a valid URL');
     }
   };

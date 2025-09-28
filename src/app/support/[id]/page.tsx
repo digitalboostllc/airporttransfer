@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -19,7 +19,6 @@ import {
   CheckCircle,
   XCircle,
   Calendar,
-  FileText,
   Tag,
   Flag,
   Eye,
@@ -129,21 +128,11 @@ export default function SupportTicketPage() {
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (token && ticketId) {
-      loadTicket();
-    }
-  }, [token, ticketId]);
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  const loadTicket = async () => {
+  const loadTicket = useCallback(async () => {
     if (!token || !ticketId) return;
 
     try {
@@ -173,7 +162,17 @@ export default function SupportTicketPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [token, ticketId]);
+
+  useEffect(() => {
+    if (token && ticketId) {
+      loadTicket();
+    }
+  }, [token, ticketId, loadTicket]);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   const sendMessage = async () => {
     if (!token || !ticketId || !newMessage.trim()) return;
@@ -391,7 +390,7 @@ export default function SupportTicketPage() {
                     ) : (
                       messages
                         .filter(message => !message.isInternal || showInternalNotes)
-                        .map((message, index) => {
+                        .map((message) => {
                           const isStaff = message.user.role === 'admin';
                           const isInternal = message.isInternal;
                           

@@ -17,7 +17,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/contexts/AuthContext';
 import { createBooking } from '@/lib/bookings';
-import { sendBookingConfirmation } from '@/lib/notifications';
 import { getCarById, type Car } from '@/lib/car-client';
 import PaymentForm from '@/components/PaymentForm';
 import Header from '@/components/Header';

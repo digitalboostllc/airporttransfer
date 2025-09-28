@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { 
   ChevronLeft, 
   ChevronRight, 
@@ -11,7 +11,6 @@ import {
   Phone,
   Mail,
   Filter,
-  Eye,
   X,
   MapPin
 } from 'lucide-react';

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Star, User, Calendar, ThumbsUp, MessageCircle, ChevronDown, ChevronUp, Filter } from 'lucide-react';
+import { Star, User, Calendar, MessageCircle, ChevronDown, ChevronUp, Filter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
@@ -273,7 +273,7 @@ export default function ReviewDisplay({
 
   useEffect(() => {
     fetchReviews(true);
-  }, [carId, agencyId, customerId, filterRating]);
+  }, [carId, agencyId, customerId, filterRating, fetchReviews]);
 
   const handleLoadMore = () => {
     fetchReviews(false);
