@@ -28,8 +28,8 @@ export default function TransferLogo({
         style={{ width: size, height: size }}
       >
         <svg 
-          width={size * 0.65} 
-          height={size * 0.65} 
+          width={size * 0.85} 
+          height={size * 0.85} 
           viewBox="3.833 61.375 102 90.833" 
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
