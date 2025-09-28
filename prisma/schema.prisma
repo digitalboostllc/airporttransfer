@@ -2,6 +2,7 @@
 // Prisma Schema for Car Rental Marketplace
 // ============================================================================
 // This schema provides local development database with full TypeScript support
+// Force Vercel rebuild with fresh Prisma client - resetToken fields ready
 // ============================================================================
 
 generator client {
