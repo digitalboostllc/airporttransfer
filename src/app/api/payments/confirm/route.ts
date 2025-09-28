@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
 
         // Send agency notification if agency has email
         if (booking.car?.agency?.email) {
-          // @ts-expect-error - Type mismatch due to Prisma include vs base type
+          // @ts-expect-error - Prisma include result has broader types than base Booking type
           await sendAgencyBookingNotification(
             booking,
             booking.car.agency.email,
