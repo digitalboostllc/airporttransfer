@@ -98,6 +98,15 @@ export default function Header({ variant = 'page', className = '' }: HeaderProps
                     <User className="w-4 h-4 text-gray-600" />
                   </Link>
 
+                  {/* Support Link */}
+                  <Link
+                    href="/support"
+                    className="hidden sm:block px-3 py-1.5 bg-blue-100 hover:bg-blue-200 text-blue-700 text-xs font-medium rounded-lg transition-all duration-300"
+                    title="Support"
+                  >
+                    Help
+                  </Link>
+
                   {/* Admin Dashboard Link (if admin) */}
                   {user.role === 'admin' && (
                     <Link

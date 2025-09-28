@@ -113,19 +113,20 @@ export function withAuth<P extends object>(Component: React.ComponentType<P>) {
 
 // Hook for role-based access
 export function useRequireAuth(requiredRole?: 'customer' | 'agency_owner' | 'admin') {
-  const { user } = useAuth();
+  const { user, token } = useAuth();
 
   if (!user) {
-    return { hasAccess: false, user: null, message: 'Authentication required' };
+    return { hasAccess: false, user: null, token: null, message: 'Authentication required' };
   }
 
   if (requiredRole && user.role !== requiredRole && user.role !== 'admin') {
     return { 
       hasAccess: false, 
       user, 
+      token,
       message: `${requiredRole} role required` 
     };
   }
 
-  return { hasAccess: true, user, message: '' };
+  return { hasAccess: true, user, token, message: '' };
 }

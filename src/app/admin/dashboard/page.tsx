@@ -18,13 +18,15 @@ import {
   Ban,
   UserCheck,
   UserX,
-  Clock
+  Clock,
+  MessageSquare
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useRequireAuth } from '@/contexts/AuthContext';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import FinancialReports from '@/components/FinancialReports';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import {
@@ -287,6 +289,32 @@ function AdminDashboardPage() {
                 >
                   <Calendar className="w-5 h-5 mr-3" />
                   Booking Oversight
+                </button>
+                
+                <button
+                  onClick={() => setActiveTab('reports')}
+                  className={cn(
+                    "w-full flex items-center px-4 py-3 text-left rounded-lg transition-colors",
+                    activeTab === 'reports'
+                      ? "bg-purple-50 text-purple-700 font-medium"
+                      : "text-gray-600 hover:bg-gray-50"
+                  )}
+                >
+                  <TrendingUp className="w-5 h-5 mr-3" />
+                  Financial Reports
+                </button>
+
+                <button
+                  onClick={() => setActiveTab('support')}
+                  className={cn(
+                    "w-full flex items-center px-4 py-3 text-left rounded-lg transition-colors",
+                    activeTab === 'support'
+                      ? "bg-green-50 text-green-700 font-medium"
+                      : "text-gray-600 hover:bg-gray-50"
+                  )}
+                >
+                  <MessageSquare className="w-5 h-5 mr-3" />
+                  Support Tickets
                 </button>
               </nav>
             </div>
@@ -709,6 +737,65 @@ function AdminDashboardPage() {
                     ))}
                   </div>
                 )}
+              </div>
+            )}
+
+            {/* Reports Tab */}
+            {activeTab === 'reports' && token && (
+              <FinancialReports token={token} />
+            )}
+
+            {/* Support Tab */}
+            {activeTab === 'support' && (
+              <div className="space-y-6">
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                  <div className="flex items-center justify-between mb-6">
+                    <div>
+                      <h3 className="text-xl font-semibold text-gray-900">Support Tickets</h3>
+                      <p className="text-gray-600">Manage customer support requests and inquiries</p>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => window.open('/support', '_blank')}
+                      >
+                        <MessageSquare className="w-4 h-4 mr-2" />
+                        View All Tickets
+                      </Button>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-center">
+                    <MessageSquare className="w-8 h-8 text-yellow-600 mx-auto mb-2" />
+                    <h4 className="text-lg font-medium text-yellow-900 mb-2">Support System Ready</h4>
+                    <p className="text-yellow-700 mb-4">
+                      The customer support ticket system is now available. Customers can create tickets, and admin users can manage them.
+                    </p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                      <div className="bg-white rounded-lg p-4 border border-yellow-200">
+                        <h5 className="font-medium text-gray-900 mb-2">Features Available:</h5>
+                        <ul className="text-sm text-gray-700 space-y-1">
+                          <li>• Create and manage support tickets</li>
+                          <li>• Real-time messaging between customers and support</li>
+                          <li>• Ticket categorization and priority levels</li>
+                          <li>• Customer satisfaction ratings</li>
+                          <li>• Internal notes for support staff</li>
+                        </ul>
+                      </div>
+                      <div className="bg-white rounded-lg p-4 border border-yellow-200">
+                        <h5 className="font-medium text-gray-900 mb-2">Getting Started:</h5>
+                        <ul className="text-sm text-gray-700 space-y-1">
+                          <li>• Visit the Support page to view all tickets</li>
+                          <li>• Click on individual tickets to respond</li>
+                          <li>• Use internal notes for team communication</li>
+                          <li>• Assign tickets to specific support agents</li>
+                          <li>• Track resolution times and satisfaction</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
           </div>

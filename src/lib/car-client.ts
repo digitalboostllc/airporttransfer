@@ -8,7 +8,7 @@ export interface CarData {
   pricePerDay: number;
   images?: string[];
   features?: string[];
-  specifications?: Record<string, any>;
+  specifications?: Record<string, string | number | boolean>;
   location?: string;
   description?: string;
   status?: 'available' | 'rented' | 'maintenance';
@@ -24,7 +24,7 @@ export interface Car {
   pricePerDay: number;
   images: string[];
   features: string[];
-  specifications: Record<string, any>;
+  specifications: Record<string, string | number | boolean>;
   location: string;
   description: string;
   status: string;
@@ -69,10 +69,10 @@ export async function getCars(filters?: CarFilters): Promise<Car[]> {
     const cars = await response.json();
     
     // Convert date strings to Date objects
-    return cars.map((car: any) => ({
+    return cars.map((car: Record<string, unknown>) => ({
       ...car,
-      createdAt: new Date(car.createdAt),
-      updatedAt: new Date(car.updatedAt)
+      createdAt: new Date(car.createdAt as string),
+      updatedAt: new Date(car.updatedAt as string)
     }));
   } catch (error) {
     console.error('Get cars error:', error);

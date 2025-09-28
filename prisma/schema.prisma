@@ -52,6 +52,32 @@ enum FuelType {
   electric
 }
 
+enum SupportTicketStatus {
+  open
+  in_progress
+  waiting_customer
+  resolved
+  closed
+}
+
+enum SupportTicketPriority {
+  low
+  medium
+  high
+  urgent
+}
+
+enum SupportTicketCategory {
+  booking_issue
+  payment_problem
+  car_problem
+  website_bug
+  account_issue
+  general_inquiry
+  technical_support
+  other
+}
+
 enum CarCategory {
   economy
   compact
@@ -83,6 +109,8 @@ model User {
   phoneVerified          Boolean   @default(false) @map("phone_verified")
   isActive               Boolean   @default(true) @map("is_active")
   lastLoginAt            DateTime? @map("last_login_at")
+  resetToken             String?   @map("reset_token")
+  resetTokenExpiry       DateTime? @map("reset_token_expiry")
   agencyId               String?   @unique @map("agency_id") // Link to agency for agency users
   createdAt              DateTime  @default(now()) @map("created_at")
   updatedAt              DateTime  @updatedAt @map("updated_at")
@@ -93,6 +121,9 @@ model User {
   reviews                Review[]
   notifications          Notification[]
   cancelledBookings      Booking[] @relation("BookingCancelledBy")
+  supportTickets         SupportTicket[]
+  assignedTickets        SupportTicket[] @relation("AssignedTickets")
+  supportMessages        SupportMessage[]
 
   @@map("users")
 }
@@ -278,6 +309,7 @@ model Booking {
   paymentStatus          String        @default("pending") @map("payment_status")
   paymentMethod          String?       @map("payment_method")
   paymentReference       String?       @map("payment_reference")
+  stripePaymentIntentId  String?       @map("stripe_payment_intent_id")
   paidAt                 DateTime?     @map("paid_at")
   cancelledAt            DateTime?     @map("cancelled_at")
   cancelledById          String?       @map("cancelled_by_id")
@@ -296,6 +328,7 @@ model Booking {
   extras                 BookingExtra[]
   reviews                Review[]
   notifications          Notification[]
+  supportTickets         SupportTicket[]
 
   @@map("bookings")
 }
@@ -386,4 +419,47 @@ model Notification {
   relatedBooking    Booking?  @relation(fields: [relatedBookingId], references: [id], onDelete: SetNull)
 
   @@map("notifications")
+}
+
+model SupportTicket {
+  id                String                  @id @default(cuid())
+  ticketNumber      String                  @unique @map("ticket_number")
+  userId            String                  @map("user_id")
+  category          SupportTicketCategory
+  priority          SupportTicketPriority   @default(medium)
+  status            SupportTicketStatus     @default(open)
+  subject           String
+  description       String
+  attachments       String                  @default("[]") // JSON array of file URLs
+  assignedToUserId  String?                 @map("assigned_to_user_id")
+  relatedBookingId  String?                 @map("related_booking_id")
+  internalNotes     String?                 @map("internal_notes")
+  customerSatisfaction Int?                @map("customer_satisfaction") // 1-5 rating
+  resolvedAt        DateTime?               @map("resolved_at")
+  createdAt         DateTime                @default(now()) @map("created_at")
+  updatedAt         DateTime                @updatedAt @map("updated_at")
+
+  // Relations
+  user              User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  assignedTo        User?                   @relation("AssignedTickets", fields: [assignedToUserId], references: [id], onDelete: SetNull)
+  relatedBooking    Booking?                @relation(fields: [relatedBookingId], references: [id], onDelete: SetNull)
+  messages          SupportMessage[]
+
+  @@map("support_tickets")
+}
+
+model SupportMessage {
+  id                String          @id @default(cuid())
+  ticketId          String          @map("ticket_id")
+  userId            String          @map("user_id")
+  message           String
+  attachments       String          @default("[]") // JSON array of file URLs
+  isInternal        Boolean         @default(false) @map("is_internal") // Internal notes vs customer messages
+  createdAt         DateTime        @default(now()) @map("created_at")
+
+  // Relations
+  ticket            SupportTicket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  user              User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("support_messages")
 }

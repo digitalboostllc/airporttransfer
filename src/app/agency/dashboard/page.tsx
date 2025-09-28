@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { 
   Car, 
@@ -9,15 +9,14 @@ import {
   DollarSign, 
   Edit3,
   Trash2,
-  Eye,
   Settings,
   BarChart3,
   Star,
   CheckCircle,
   XCircle,
-  Clock,
   AlertCircle,
-  Loader2
+  Loader2,
+  Clock
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -31,12 +30,11 @@ import {
   getAgencyDashboardData,
   updateBookingStatus,
   type AgencyDashboardData,
-  type AgencyStats,
-  type AgencyBooking,
   type AgencyCar
 } from '@/lib/agency-client';
 import { deleteCar, toggleCarStatus } from '@/lib/car-client';
 import CarManagementModal from '@/components/CarManagementModal';
+import BookingCalendar from '@/components/BookingCalendar';
 
 
 function AgencyDashboardPage() {
@@ -57,7 +55,7 @@ function AgencyDashboardPage() {
   const [updatingCar, setUpdatingCar] = useState<string | null>(null);
 
   // Load dashboard data
-  const loadDashboardData = async () => {
+  const loadDashboardData = useCallback(async () => {
     if (!token) return;
     
     setLoading(true);
@@ -75,7 +73,7 @@ function AgencyDashboardPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [token]);
 
   // Handle booking status update
   const handleBookingStatusUpdate = async (bookingId: string, newStatus: 'confirmed' | 'cancelled' | 'completed' | 'in_progress') => {
@@ -163,7 +161,7 @@ function AgencyDashboardPage() {
     if (user && token && hasAccess) {
       loadDashboardData();
     }
-  }, [user, token, hasAccess]);
+  }, [user, token, hasAccess, loadDashboardData]);
 
   if (!hasAccess) {
     return (
@@ -268,8 +266,21 @@ function AgencyDashboardPage() {
                       : "text-gray-600 hover:bg-gray-50"
                   )}
                 >
-                  <Calendar className="w-5 h-5 mr-3" />
+                  <Clock className="w-5 h-5 mr-3" />
                   Bookings
+                </button>
+                
+                <button
+                  onClick={() => setActiveTab('calendar')}
+                  className={cn(
+                    "w-full flex items-center px-4 py-3 text-left rounded-lg transition-colors",
+                    activeTab === 'calendar'
+                      ? "bg-orange-50 text-orange-700 font-medium"
+                      : "text-gray-600 hover:bg-gray-50"
+                  )}
+                >
+                  <Calendar className="w-5 h-5 mr-3" />
+                  Calendar View
                 </button>
                 
                 <button
@@ -553,7 +564,6 @@ function AgencyDashboardPage() {
                     ))}
                   </div>
                 )}
-                </div>
               </div>
             )}
 
@@ -660,6 +670,62 @@ function AgencyDashboardPage() {
                     ))}
                   </div>
                 )}
+              </div>
+            )}
+
+            {/* Calendar Tab */}
+            {activeTab === 'calendar' && (
+              <div className="space-y-6">
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                  <div className="flex items-center justify-between mb-6">
+                    <div>
+                      <h3 className="text-xl font-semibold text-gray-900">Calendar View</h3>
+                      <p className="text-gray-600">Visualize your bookings and manage availability</p>
+                    </div>
+                  </div>
+                  
+                  {loading ? (
+                    <div className="text-center py-12">
+                      <div className="w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                      <p className="text-gray-600">Loading calendar...</p>
+                    </div>
+                  ) : (
+                    <BookingCalendar
+                      bookings={dashboardData?.bookings.map(booking => ({
+                        id: booking.id,
+                        bookingReference: booking.bookingReference,
+                        customerName: booking.customerName,
+                        customerEmail: booking.customerEmail,
+                        customerPhone: booking.customerPhone,
+                        pickupDatetime: booking.pickupDatetime.toISOString(),
+                        dropoffDatetime: booking.dropoffDatetime.toISOString(),
+                        status: booking.status,
+                        totalPrice: booking.totalPrice,
+                        carId: booking.carId || '',
+                        carMake: booking.carMake,
+                        carModel: booking.carModel,
+                        carYear: booking.carYear,
+                        specialRequests: booking.specialRequests || undefined
+                      })) || []}
+                      cars={dashboardData?.cars.map(car => ({
+                        id: car.id,
+                        make: car.make,
+                        model: car.model,
+                        year: car.year,
+                        category: car.category
+                      })) || []}
+                      loading={loading}
+                      onDateClick={(date) => {
+                        console.log('Date clicked:', date);
+                        // TODO: Add functionality for date click (e.g., create new booking)
+                      }}
+                      onBookingClick={(booking) => {
+                        console.log('Booking clicked:', booking);
+                        // TODO: Add functionality for booking click (e.g., view/edit booking)
+                      }}
+                    />
+                  )}
+                </div>
               </div>
             )}
 

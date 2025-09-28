@@ -4,13 +4,14 @@ import React, { useState, useEffect } from 'react';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { 
   ArrowLeft, 
-  Car, 
+  Car as CarIcon, 
   Calendar, 
   MapPin, 
   Clock, 
   CreditCard,
   Shield,
-  Check
+  Check,
+  Loader2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -18,6 +19,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { createBooking } from '@/lib/bookings';
 import { sendBookingConfirmation } from '@/lib/notifications';
 import { getCarById, type Car } from '@/lib/car-client';
+import PaymentForm from '@/components/PaymentForm';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { format, differenceInDays } from 'date-fns';
@@ -50,7 +52,7 @@ export default function BookingPage() {
   const { user } = useAuth();
 
   // Booking state
-  const [step, setStep] = useState(1); // 1: Details, 2: Payment, 3: Confirmation
+  const [step, setStep] = useState(1); // 1: Details, 2: Review, 3: Payment, 4: Confirmation
   const [loading, setLoading] = useState(false);
   const [selectedExtras, setSelectedExtras] = useState<string[]>([]);
   
@@ -86,6 +88,12 @@ export default function BookingPage() {
     cardholderName: '',
     agreeToTerms: false
   });
+  
+  // Stripe payment state
+  const [bookingId, setBookingId] = useState<string>('');
+  const [clientSecret, setClientSecret] = useState<string>('');
+  const [paymentProcessing, setPaymentProcessing] = useState(false);
+  const [paymentError, setPaymentError] = useState<string>('');
 
   // Load car data
   useEffect(() => {
@@ -154,20 +162,23 @@ export default function BookingPage() {
   };
 
   const handleNextStep = () => {
-    if (step < 3) {
+    if (step < 4) {
       setStep(step + 1);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
   const handleBooking = async () => {
-    if (!user) return;
+    if (!user || !car) return;
 
     setLoading(true);
     try {
-      // Create the booking
-      const basePrice = mockCar.pricePerDay * rentalDays;
-      const extrasPrice = 0; // TODO: Calculate from selectedExtras
+      // Calculate pricing
+      const basePrice = car.pricePerDay * rentalDays;
+      const extrasPrice = selectedExtras.reduce((total, extraId) => {
+        const extra = availableExtras.find(e => e.id === extraId);
+        return total + (extra?.price || 0);
+      }, 0);
       const insurancePrice = 0; // TODO: Calculate based on insurance selection
       const taxAmount = (basePrice + extrasPrice + insurancePrice) * 0.2; // 20% tax
       const securityDeposit = basePrice * 0.3; // 30% security deposit
@@ -187,51 +198,47 @@ export default function BookingPage() {
         taxAmount,
         totalAmount: totalPrice,
         securityDeposit,
-        status: 'confirmed' as const
+        status: 'pending' as const // Start as pending until payment is confirmed
       };
 
       const bookingResult = await createBooking(bookingData);
       
-      if (bookingResult.success) {
-        // Send confirmation email (don't wait for it to complete)
-        sendBookingConfirmation({
-          id: bookingResult.bookingId!,
-          bookingReference: `VB-${Date.now()}`, // This will be generated properly in the booking function
-          customerId: user.id,
-          carId: params.id as string,
-          customerName: contactDetails.name,
-          customerEmail: contactDetails.email,
-          customerPhone: contactDetails.phone,
-          pickupDatetime: pickupDate,
-          dropoffDatetime: returnDate,
-          status: 'confirmed',
-          basePrice,
-          extrasPrice,
-          insurancePrice,
-          taxAmount,
-          totalPrice: totalPrice,
-          securityDeposit,
-          paymentMethod,
-          paymentStatus: 'completed',
-          specialRequests: contactDetails.additionalRequests,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          car: {
-            id: car?.id || params.id as string,
-            make: car?.make || '',
-            model: car?.model || '',
-            year: car?.year || new Date().getFullYear(),
-            category: car?.category || '',
-            images: car?.images || [],
-            agency: {
-              name: car?.agency?.name || 'Car Rental Agency'
-            }
-          }
-        }, user).catch(error => console.error('Email sending failed:', error));
+      if (bookingResult.success && bookingResult.bookingId) {
+        setBookingId(bookingResult.bookingId);
 
-        setStep(3); // Go to confirmation
+        // For credit card payments, create payment intent
+        if (paymentMethod === 'card') {
+          try {
+            const paymentResponse = await fetch('/api/payments/create-intent', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${user.token}`,
+              },
+              body: JSON.stringify({
+                bookingId: bookingResult.bookingId,
+                amount: totalPrice,
+              }),
+            });
+
+            const paymentData = await paymentResponse.json();
+
+            if (paymentResponse.ok) {
+              setClientSecret(paymentData.clientSecret);
+              setStep(3); // Go to payment step
+            } else {
+              throw new Error(paymentData.error || 'Failed to create payment intent');
+            }
+          } catch (paymentError) {
+            console.error('Payment intent creation error:', paymentError);
+            alert('Failed to initialize payment. Please try again.');
+          }
+        } else {
+          // For cash payments, go directly to confirmation
+          setStep(4); // Go to confirmation
+        }
       } else {
-        throw new Error('Failed to create booking');
+        throw new Error(bookingResult.error || 'Failed to create booking');
       }
     } catch (error) {
       console.error('Booking error:', error);
@@ -241,11 +248,47 @@ export default function BookingPage() {
     }
   };
 
+  const handlePaymentSuccess = async () => {
+    if (!user || !bookingId) return;
+    
+    setPaymentProcessing(true);
+    try {
+      // Confirm payment on server
+      const response = await fetch('/api/payments/confirm', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${user.token}`,
+        },
+        body: JSON.stringify({
+          paymentIntentId: clientSecret.split('_secret_')[0], // Extract payment intent ID
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setStep(4); // Go to confirmation
+      } else {
+        setPaymentError(data.error || 'Payment confirmation failed');
+      }
+    } catch (error) {
+      console.error('Payment confirmation error:', error);
+      setPaymentError('Payment confirmation failed');
+    } finally {
+      setPaymentProcessing(false);
+    }
+  };
+
+  const handlePaymentError = (error: string) => {
+    setPaymentError(error);
+  };
+
   if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
-          <Car className="w-16 h-16 text-red-500 mx-auto mb-4" />
+          <CarIcon className="w-16 h-16 text-red-500 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Please Sign In</h2>
           <p className="text-gray-600 mb-6">You need to be signed in to book a car.</p>
           <Button 
@@ -286,7 +329,7 @@ export default function BookingPage() {
           <div className="flex items-center justify-center py-16">
             <div className="text-center">
               <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Car className="w-8 h-8 text-red-600" />
+                <CarIcon className="w-8 h-8 text-red-600" />
               </div>
               <h2 className="text-xl font-semibold text-red-900 mb-2">
                 {carError || 'Car not found'}
@@ -333,7 +376,7 @@ export default function BookingPage() {
         {/* Progress Steps */}
         <div className="mb-8">
           <div className="flex items-center justify-center space-x-4">
-            {[1, 2, 3].map((num) => (
+            {[1, 2, 3, 4].map((num) => (
               <div key={num} className="flex items-center">
                 <div className={cn(
                   "w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium",
@@ -343,17 +386,18 @@ export default function BookingPage() {
                 )}>
                   {step > num ? <Check className="w-5 h-5" /> : num}
                 </div>
-                {num < 3 && (
+                {num < 4 && (
                   <div className={cn(
-                    "w-20 h-1 mx-2",
+                    "w-16 h-1 mx-2",
                     step > num ? "bg-red-600" : "bg-gray-200"
                   )} />
                 )}
               </div>
             ))}
           </div>
-          <div className="flex items-center justify-center space-x-8 mt-2">
-            <span className="text-sm text-gray-600">Booking Details</span>
+          <div className="flex items-center justify-center space-x-6 mt-2">
+            <span className="text-sm text-gray-600">Details</span>
+            <span className="text-sm text-gray-600">Review</span>
             <span className="text-sm text-gray-600">Payment</span>
             <span className="text-sm text-gray-600">Confirmation</span>
           </div>
@@ -467,15 +511,44 @@ export default function BookingPage() {
                   className="w-full bg-red-600 hover:bg-red-700"
                   disabled={!contactDetails.name || !contactDetails.email || !contactDetails.phone || !contactDetails.drivingLicense}
                 >
-                  Continue to Payment
+                  Continue to Review
                 </Button>
               </div>
             )}
 
-            {/* Step 2: Payment */}
+            {/* Step 2: Review & Payment Method */}
             {step === 2 && (
               <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">Payment Information</h2>
+                <h2 className="text-2xl font-bold text-gray-900 mb-6">Review Your Booking</h2>
+
+                {/* Booking Summary */}
+                <div className="mb-8 p-4 bg-gray-50 rounded-lg">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Booking Summary</h3>
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <p className="text-gray-600">Contact Name:</p>
+                      <p className="font-medium">{contactDetails.name}</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-600">Email:</p>
+                      <p className="font-medium">{contactDetails.email}</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-600">Phone:</p>
+                      <p className="font-medium">{contactDetails.phone}</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-600">License:</p>
+                      <p className="font-medium">{contactDetails.drivingLicense}</p>
+                    </div>
+                  </div>
+                  {contactDetails.additionalRequests && (
+                    <div className="mt-4">
+                      <p className="text-gray-600 mb-1">Special Requests:</p>
+                      <p className="text-sm bg-white p-2 rounded border">{contactDetails.additionalRequests}</p>
+                    </div>
+                  )}
+                </div>
 
                 {/* Payment Method Selection */}
                 <div className="mb-6">
@@ -512,59 +585,6 @@ export default function BookingPage() {
                   </div>
                 </div>
 
-                {/* Card Details */}
-                {paymentMethod === 'card' && (
-                  <div className="mb-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Card Details</h3>
-                    <div className="space-y-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Cardholder Name</label>
-                        <Input
-                          name="cardholderName"
-                          value={paymentDetails.cardholderName}
-                          onChange={handlePaymentChange}
-                          placeholder="Name on card"
-                          required
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Card Number</label>
-                        <Input
-                          name="cardNumber"
-                          value={paymentDetails.cardNumber}
-                          onChange={handlePaymentChange}
-                          placeholder="1234 5678 9012 3456"
-                          maxLength={19}
-                          required
-                        />
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">Expiry Date</label>
-                          <Input
-                            name="expiryDate"
-                            value={paymentDetails.expiryDate}
-                            onChange={handlePaymentChange}
-                            placeholder="MM/YY"
-                            maxLength={5}
-                            required
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">CVV</label>
-                          <Input
-                            name="cvv"
-                            value={paymentDetails.cvv}
-                            onChange={handlePaymentChange}
-                            placeholder="123"
-                            maxLength={3}
-                            required
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
 
                 {/* Terms and Conditions */}
                 <div className="mb-6">
@@ -594,24 +614,57 @@ export default function BookingPage() {
                   </Button>
                   <Button 
                     onClick={handleBooking}
-                    disabled={loading || !paymentDetails.agreeToTerms || (paymentMethod === 'card' && (!paymentDetails.cardNumber || !paymentDetails.expiryDate || !paymentDetails.cvv))}
+                    disabled={loading || !paymentDetails.agreeToTerms}
                     className="flex-1 bg-green-600 hover:bg-green-700"
                   >
                     {loading ? (
                       <div className="flex items-center justify-center">
                         <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                        Processing...
+                        Creating Booking...
                       </div>
+                    ) : paymentMethod === 'card' ? (
+                      'Continue to Payment'
                     ) : (
-                      'Complete Booking'
+                      'Confirm Booking'
                     )}
                   </Button>
                 </div>
               </div>
             )}
 
-            {/* Step 3: Confirmation */}
-            {step === 3 && (
+            {/* Step 3: Payment */}
+            {step === 3 && paymentMethod === 'card' && clientSecret && (
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+                <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">Secure Payment</h2>
+                
+                {paymentError && (
+                  <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                    <p className="text-red-700 text-sm">{paymentError}</p>
+                  </div>
+                )}
+
+                <PaymentForm
+                  clientSecret={clientSecret}
+                  amount={totalPrice}
+                  currency="MAD"
+                  bookingReference={bookingId}
+                  onSuccess={handlePaymentSuccess}
+                  onError={handlePaymentError}
+                />
+
+                {paymentProcessing && (
+                  <div className="mt-6 text-center">
+                    <div className="flex items-center justify-center">
+                      <Loader2 className="w-5 h-5 animate-spin text-gray-500 mr-2" />
+                      <span className="text-gray-600">Confirming payment...</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Step 4: Confirmation */}
+            {step === 4 && (
               <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center">
                 <div className="mb-6">
                   <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -625,7 +678,7 @@ export default function BookingPage() {
                   <h3 className="font-semibold text-gray-900 mb-3">Booking Details</h3>
                   <div className="space-y-2 text-sm">
                     <p><span className="font-medium">Booking ID:</span> CR-{Date.now()}</p>
-                    <p><span className="font-medium">Car:</span> {mockCar.make} {mockCar.model} {mockCar.year}</p>
+                    <p><span className="font-medium">Car:</span> {car?.make} {car?.model} {car?.year}</p>
                     <p><span className="font-medium">Pickup:</span> {format(pickupDate, 'PPP')}</p>
                     <p><span className="font-medium">Return:</span> {format(returnDate, 'PPP')}</p>
                     <p><span className="font-medium">Location:</span> {pickup_location}</p>
@@ -661,16 +714,16 @@ export default function BookingPage() {
               <div className="flex items-center space-x-3 mb-6 pb-6 border-b border-gray-200">
                 <div className="w-16 h-12 bg-gray-100 rounded-lg overflow-hidden">
                   <Image
-                    src={mockCar.image || '/placeholder-car.png'}
-                    alt={`${mockCar.make} ${mockCar.model}`}
+                    src={car?.images?.[0] || '/placeholder-car.png'}
+                    alt={`${car?.make} ${car?.model}`}
                     width={64}
                     height={48}
                     className="w-full h-full object-cover"
                   />
                 </div>
                 <div>
-                  <h4 className="font-semibold text-gray-900">{mockCar.make} {mockCar.model}</h4>
-                  <p className="text-sm text-gray-600">{mockCar.year} • {mockCar.category}</p>
+                  <h4 className="font-semibold text-gray-900">{car?.make} {car?.model}</h4>
+                  <p className="text-sm text-gray-600">{car?.year} • {car?.category}</p>
                 </div>
               </div>
 

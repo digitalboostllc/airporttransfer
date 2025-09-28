@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
     const dataType = url.searchParams.get('type'); // 'stats', 'bookings', 'cars', or 'all'
     const limit = url.searchParams.get('limit');
 
-    let result: any = {};
+    let result: Record<string, unknown> = {};
 
     switch (dataType) {
       case 'stats':

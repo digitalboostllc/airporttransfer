@@ -114,16 +114,16 @@ export async function getAgencyDashboardData(token: string): Promise<AgencyDashb
     // Convert date strings back to Date objects
     return {
       ...data,
-      bookings: data.bookings.map((booking: any) => ({
+      bookings: data.bookings.map((booking: Record<string, unknown>) => ({
         ...booking,
-        pickupDatetime: new Date(booking.pickupDatetime),
-        dropoffDatetime: new Date(booking.dropoffDatetime),
-        createdAt: new Date(booking.createdAt)
+        pickupDatetime: new Date(booking.pickupDatetime as string),
+        dropoffDatetime: new Date(booking.dropoffDatetime as string),
+        createdAt: new Date(booking.createdAt as string)
       })),
-      cars: data.cars.map((car: any) => ({
+      cars: data.cars.map((car: Record<string, unknown>) => ({
         ...car,
-        createdAt: new Date(car.createdAt),
-        updatedAt: new Date(car.updatedAt)
+        createdAt: new Date(car.createdAt as string),
+        updatedAt: new Date(car.updatedAt as string)
       }))
     };
   } catch (error) {
@@ -174,11 +174,11 @@ export async function getAgencyBookings(token: string, limit?: number): Promise<
     const data = await response.json();
     
     // Convert date strings to Date objects
-    return data.bookings.map((booking: any) => ({
+    return data.bookings.map((booking: Record<string, unknown>) => ({
       ...booking,
-      pickupDatetime: new Date(booking.pickupDatetime),
-      dropoffDatetime: new Date(booking.dropoffDatetime),
-      createdAt: new Date(booking.createdAt)
+      pickupDatetime: new Date(booking.pickupDatetime as string),
+      dropoffDatetime: new Date(booking.dropoffDatetime as string),
+      createdAt: new Date(booking.createdAt as string)
     }));
   } catch (error) {
     console.error('Get agency bookings error:', error);
@@ -204,10 +204,10 @@ export async function getAgencyCars(token: string): Promise<AgencyCar[]> {
     const data = await response.json();
     
     // Convert date strings to Date objects
-    return data.cars.map((car: any) => ({
+    return data.cars.map((car: Record<string, unknown>) => ({
       ...car,
-      createdAt: new Date(car.createdAt),
-      updatedAt: new Date(car.updatedAt)
+      createdAt: new Date(car.createdAt as string),
+      updatedAt: new Date(car.updatedAt as string)
     }));
   } catch (error) {
     console.error('Get agency cars error:', error);

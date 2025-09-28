@@ -34,6 +34,7 @@ import Image from 'next/image';
 import { getCarById } from '@/lib/car-client';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import ReviewDisplay from '@/components/ReviewDisplay';
 
 // Car type for component state
 type CarType = {
@@ -255,10 +256,10 @@ function CarDetailsContent() {
               email: 'contact@agency.com'
             },
             specifications: {
-              engine: carData.specifications?.engine || '1.6L',
-              transmission: carData.specifications?.transmission || 'Manual',
-              fuelType: carData.specifications?.fuelType || 'Petrol',
-              seats: carData.specifications?.seats || 5,
+              engine: String(carData.specifications?.engine || '1.6L'),
+              transmission: String(carData.specifications?.transmission || 'Manual'),
+              fuelType: String(carData.specifications?.fuelType || 'Petrol'),
+              seats: Number(carData.specifications?.seats || 5),
               luggage: `${carData.specifications?.luggage || 2} Large`,
               doors: `${carData.specifications?.doors || 4} Doors`,
               airConditioning: carData.features?.includes('Air Conditioning') ? 'Yes' : 'No',
@@ -700,6 +701,15 @@ function CarDetailsContent() {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Reviews Section */}
+        <div className="mt-12">
+          <ReviewDisplay
+            carId={carId}
+            limit={10}
+            showCarInfo={false}
+          />
         </div>
       </div>
       

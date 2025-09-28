@@ -3,10 +3,9 @@
 import React, { useState, useEffect } from 'react';
 import { 
   X, 
-  Upload, 
   Trash2, 
   Plus, 
-  Car, 
+  Car as CarIcon, 
   Loader2,
   AlertCircle,
   CheckCircle,
@@ -14,7 +13,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { cn } from '@/lib/utils';
+import ImageUpload from '@/components/ImageUpload';
 import { 
   createCar, 
   updateCar, 
@@ -24,6 +23,7 @@ import {
   CAR_MAKES,
   CAR_FEATURES
 } from '@/lib/car-client';
+import { type AgencyCar } from '@/lib/agency-client';
 
 interface CarManagementModalProps {
   isOpen: boolean;
@@ -131,13 +131,13 @@ export default function CarManagementModal({
   }, [isEditing, car]);
 
   // Handle input changes
-  const handleInputChange = (field: keyof FormData, value: any) => {
+  const handleInputChange = (field: keyof FormData, value: string | number | boolean | string[]) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     if (error) setError('');
     if (success) setSuccess('');
   };
 
-  const handleSpecificationChange = (field: keyof FormData['specifications'], value: any) => {
+  const handleSpecificationChange = (field: keyof FormData['specifications'], value: string | number | boolean) => {
     setFormData(prev => ({
       ...prev,
       specifications: {
@@ -239,7 +239,7 @@ export default function CarManagementModal({
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <div className="flex items-center">
-            <Car className="w-6 h-6 text-orange-600 mr-3" />
+            <CarIcon className="w-6 h-6 text-orange-600 mr-3" />
             <h2 className="text-xl font-semibold text-gray-900">
               {isEditing ? 'Edit Car' : 'Add New Car'}
             </h2>
@@ -431,52 +431,12 @@ export default function CarManagementModal({
           {/* Images */}
           <div>
             <h3 className="text-lg font-medium text-gray-900 mb-4">Car Images</h3>
-            <div className="space-y-4">
-              <div className="flex gap-2">
-                <Input
-                  type="url"
-                  value={newImageUrl}
-                  onChange={(e) => setNewImageUrl(e.target.value)}
-                  placeholder="Enter image URL"
-                  className="flex-1"
-                />
-                <Button type="button" onClick={addImage} variant="outline">
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add
-                </Button>
-              </div>
-
-              {formData.images.length > 0 && (
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {formData.images.map((url, index) => (
-                    <div key={index} className="relative group">
-                      <img
-                        src={url}
-                        alt={`Car image ${index + 1}`}
-                        className="w-full h-24 object-cover rounded-lg border border-gray-200"
-                        onError={(e) => {
-                          e.currentTarget.style.display = 'none';
-                        }}
-                      />
-                      <button
-                        type="button"
-                        onClick={() => removeImage(index)}
-                        className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        <Trash2 className="w-3 h-3" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {formData.images.length === 0 && (
-                <div className="text-center py-8 border-2 border-dashed border-gray-300 rounded-lg">
-                  <ImageIcon className="w-12 h-12 text-gray-400 mx-auto mb-2" />
-                  <p className="text-gray-500">No images added yet</p>
-                </div>
-              )}
-            </div>
+            <ImageUpload
+              images={formData.images}
+              onImagesChange={(images) => handleInputChange('images', images)}
+              maxImages={6}
+              maxSizePerImageMB={5}
+            />
           </div>
 
           {/* Features */}

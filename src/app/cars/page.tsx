@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import {
-  Car,
+  Car as CarIcon,
   Users,
   Luggage,
   Fuel,
@@ -25,8 +25,6 @@ import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import Link from 'next/link';
 import Image from 'next/image';
-import { searchCars } from '@/lib/prisma';
-import type { CarSearchParams } from '@/types/database.types';
 import { getCars, type Car } from '@/lib/car-client';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -459,24 +457,18 @@ function CarListingContent() {
         model: car.model,
         year: car.year,
         category: car.category,
-        image: car.images[0] || '/placeholder-car.png',
-        pricePerDay: car.pricePerDay,
-        seats: car.specifications?.seats || 5,
-        doors: car.specifications?.doors || 4,
-        luggage: car.specifications?.luggage || 2,
-        transmission: car.specifications?.transmission || 'Manual',
-        fuelType: car.specifications?.fuelType || 'Petrol',
-        airConditioning: car.features?.includes('Air Conditioning') || false,
-        agency: {
-          name: car.agency?.name || 'Unknown Agency',
-          rating: car.averageRating || 0,
-          reviews: car.totalBookings || 0,
-          location: car.location || 'Morocco'
-        },
+        basePricePerDay: car.pricePerDay,
         features: car.features || [],
-        available: car.isActive && car.status === 'available',
-        totalPrice: car.pricePerDay * 3, // Example 3-day rental
-        insurance: 'Basic included',
+        images: car.images || [],
+        mainImageUrl: car.images?.[0],
+        agency_name: car.agency?.name || 'Unknown Agency',
+        agency_rating: car.averageRating || 0,
+        agency_reviews: car.totalBookings || 0,
+        seats: Number(car.specifications?.seats) || 5,
+        transmission: String(car.specifications?.transmission) || 'Manual',
+        fuelType: String(car.specifications?.fuelType) || 'Petrol',
+        luggageCapacity: Number(car.specifications?.luggage) || 2,
+        basicInsuranceIncluded: car.features?.includes('Insurance') || false,
         freeKmPerDay: 300
       }));
       
@@ -708,7 +700,7 @@ function CarListingContent() {
                         onClick={() => setIsPickupDateOpen(false)}
                         className="bg-green-600 hover:bg-green-700"
                       >
-                        <Car className="w-4 h-4 mr-2" />
+                        <CarIcon className="w-4 h-4 mr-2" />
                         Search Cars
                       </Button>
                     </div>
@@ -914,7 +906,7 @@ function CarListingContent() {
             {/* Category Summary */}
             {searchFormData.carCategory !== 'all' && (
               <div className="flex items-center gap-2">
-                <Car className="w-4 h-4 text-gray-400" />
+                <CarIcon className="w-4 h-4 text-gray-400" />
                 <span className="text-gray-600 capitalize">{searchFormData.carCategory}</span>
               </div>
             )}
@@ -972,7 +964,7 @@ function CarListingContent() {
                 onClick={() => handleSearchFormChange('carCategory', category.id)}
               >
                 <div className="car-3d-icon w-5 h-5 mx-auto mb-1 flex items-center justify-center">
-                  <Car className="w-4 h-4 text-gray-700" />
+                  <CarIcon className="w-4 h-4 text-gray-700" />
                 </div>
                 <h4 className="font-semibold text-gray-800 text-xs">{category.name}</h4>
               </div>
@@ -1008,7 +1000,7 @@ function CarListingContent() {
           {error ? (
             <div className="bg-red-50 border border-red-200 rounded-xl p-8 text-center">
               <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Car className="w-6 h-6 text-red-600" />
+                <CarIcon className="w-6 h-6 text-red-600" />
               </div>
               <h3 className="text-lg font-semibold text-red-900 mb-2">Failed to load cars</h3>
               <p className="text-red-700 mb-4">{error}</p>
@@ -1027,7 +1019,7 @@ function CarListingContent() {
             </div>
           ) : filteredCars.length === 0 ? (
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center">
-              <Car className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+              <CarIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-gray-900 mb-2">No cars found</h3>
               <p className="text-gray-600">Try adjusting your filters to see more options.</p>
             </div>
@@ -1040,7 +1032,7 @@ function CarListingContent() {
                       <div className="md:col-span-1">
                         <div className="relative">
                           <Image 
-                            src={car.image || '/placeholder-car.png'} 
+                            src={car.images?.[0] || car.mainImageUrl || '/placeholder-car.png'} 
                             alt={`${car.make} ${car.model}`}
                             width={400}
                             height={128}

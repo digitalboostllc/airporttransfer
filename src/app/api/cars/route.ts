@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
     const available = url.searchParams.get('available');
     const limit = url.searchParams.get('limit');
 
-    let where: any = { isActive: true };
+    const where: Record<string, unknown> = { isActive: true };
 
     // Filter by agency
     if (agencyId) {
@@ -68,13 +68,26 @@ export async function GET(request: NextRequest) {
         model: car.model,
         year: car.year,
         category: car.category,
-        pricePerDay: car.pricePerDay,
-        images: car.images || [],
-        features: car.features || [],
-        specifications: car.specifications || {},
-        location: car.location || '',
+        pricePerDay: car.basePricePerDay,
+        images: JSON.parse(car.images || '[]'),
+        features: JSON.parse(car.features || '[]'),
+        specifications: {
+          engine: car.engineSize || '',
+          transmission: car.transmission,
+          fuelType: car.fuelType,
+          seats: car.seats,
+          luggage: car.luggageCapacity || 0,
+          doors: car.doors,
+          airConditioning: true,
+          insurance: car.basicInsuranceIncluded ? 'Basic included' : 'Not included',
+          mileage: car.mileage.toString(),
+          minimumAge: `${car.minimumAge} years`,
+          drivingLicense: `Valid for ${car.minimumLicenseYears}+ years`,
+          deposit: `${car.securityDeposit} MAD`,
+        },
+        location: '', // Not in current schema
         status: car.status,
-        isActive: car.isActive,
+        isActive: car.status === 'available',
         totalBookings: car._count.bookings,
         averageRating: Math.round(averageRating * 10) / 10,
         agency: car.agency,
@@ -132,14 +145,18 @@ export async function POST(request: NextRequest) {
         model: carData.model,
         year: parseInt(carData.year),
         category: carData.category,
-        pricePerDay: parseFloat(carData.pricePerDay),
-        images: carData.images || [],
-        features: carData.features || [],
-        specifications: carData.specifications || {},
-        location: carData.location || agency.city,
-        description: carData.description || '',
+        basePricePerDay: parseFloat(carData.pricePerDay),
+        images: JSON.stringify(carData.images || []),
+        features: JSON.stringify(carData.features || []),
         status: 'available',
-        isActive: true
+        seats: carData.specifications?.seats || 5,
+        doors: carData.specifications?.doors || 4,
+        transmission: carData.specifications?.transmission || 'manual',
+        fuelType: carData.specifications?.fuelType || 'petrol',
+        securityDeposit: parseFloat(carData.specifications?.deposit?.replace(/[^\d.]/g, '') || '2000'),
+        minimumAge: parseInt(carData.specifications?.minimumAge?.replace(/\D/g, '') || '21'),
+        minimumLicenseYears: parseInt(carData.specifications?.drivingLicense?.replace(/\D/g, '') || '1'),
+        basicInsuranceIncluded: true
       },
       include: {
         agency: {
@@ -160,14 +177,27 @@ export async function POST(request: NextRequest) {
         model: car.model,
         year: car.year,
         category: car.category,
-        pricePerDay: car.pricePerDay,
-        images: car.images || [],
-        features: car.features || [],
-        specifications: car.specifications || {},
-        location: car.location || '',
-        description: car.description || '',
+        pricePerDay: car.basePricePerDay,
+        images: JSON.parse(car.images || '[]'),
+        features: JSON.parse(car.features || '[]'),
+        specifications: {
+          engine: car.engineSize || '',
+          transmission: car.transmission,
+          fuelType: car.fuelType,
+          seats: car.seats,
+          luggage: car.luggageCapacity || 0,
+          doors: car.doors,
+          airConditioning: true,
+          insurance: car.basicInsuranceIncluded ? 'Basic included' : 'Not included',
+          mileage: car.mileage.toString(),
+          minimumAge: `${car.minimumAge} years`,
+          drivingLicense: `Valid for ${car.minimumLicenseYears}+ years`,
+          deposit: `${car.securityDeposit} MAD`,
+        },
+        location: '', // Not in current schema
+        description: '', // Not in current schema
         status: car.status,
-        isActive: car.isActive,
+        isActive: car.status === 'available',
         agency: car.agency,
         createdAt: car.createdAt,
         updatedAt: car.updatedAt

@@ -23,6 +23,7 @@ import { getUserBookings, cancelBooking, type Booking } from '@/lib/bookings';
 import { sendBookingCancellation } from '@/lib/notifications';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import ReviewForm from '@/components/ReviewForm';
 import { format, differenceInDays } from 'date-fns';
 import Image from 'next/image';
 
@@ -36,6 +37,10 @@ function ProfilePage() {
   const [success, setSuccess] = useState('');
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [bookingsLoading, setBookingsLoading] = useState(false);
+  
+  // Review state
+  const [reviewModalOpen, setReviewModalOpen] = useState(false);
+  const [selectedBookingForReview, setSelectedBookingForReview] = useState<Booking | null>(null);
 
   const [profileData, setProfileData] = useState({
     name: user?.name || '',
@@ -157,6 +162,23 @@ function ProfilePage() {
       console.error('Cancel booking error:', error);
       setError('An error occurred while cancelling the booking');
     }
+  };
+
+  // Review functions
+  const handleOpenReviewModal = (booking: Booking) => {
+    setSelectedBookingForReview(booking);
+    setReviewModalOpen(true);
+  };
+
+  const handleCloseReviewModal = () => {
+    setReviewModalOpen(false);
+    setSelectedBookingForReview(null);
+  };
+
+  const handleReviewSuccess = () => {
+    setSuccess('Review submitted successfully!');
+    // Reload bookings to update review status if needed
+    loadBookings();
   };
 
   // Get booking status styling
@@ -503,14 +525,27 @@ function ProfilePage() {
                                 )}
                               </div>
                               
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => router.push(`/cars/${booking.carId}`)}
-                                className="text-xs"
-                              >
-                                View Car
-                              </Button>
+                              <div className="flex flex-col gap-2">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => router.push(`/cars/${booking.carId}`)}
+                                  className="text-xs"
+                                >
+                                  View Car
+                                </Button>
+                                
+                                {booking.status === 'completed' && (
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => handleOpenReviewModal(booking)}
+                                    className="text-xs bg-yellow-50 border-yellow-200 text-yellow-700 hover:bg-yellow-100"
+                                  >
+                                    ⭐ Write Review
+                                  </Button>
+                                )}
+                              </div>
                             </div>
                           </div>
                           
@@ -596,6 +631,23 @@ function ProfilePage() {
       </div>
 
       <Footer />
+
+      {/* Review Modal */}
+      {reviewModalOpen && selectedBookingForReview && token && (
+        <ReviewForm
+          bookingId={selectedBookingForReview.id}
+          carDetails={{
+            make: selectedBookingForReview.car.make,
+            model: selectedBookingForReview.car.model,
+            year: selectedBookingForReview.car.year,
+            category: selectedBookingForReview.car.category
+          }}
+          isOpen={reviewModalOpen}
+          onClose={handleCloseReviewModal}
+          onSuccess={handleReviewSuccess}
+          token={token}
+        />
+      )}
     </div>
   );
 }

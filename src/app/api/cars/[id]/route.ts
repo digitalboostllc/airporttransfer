@@ -6,11 +6,12 @@ import { getAgencyByUserId } from '@/lib/agency';
 // GET - Get car by ID
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const car = await prisma.car.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         agency: {
           select: {
@@ -60,14 +61,27 @@ export async function GET(
       model: car.model,
       year: car.year,
       category: car.category,
-      pricePerDay: car.pricePerDay,
+      pricePerDay: car.basePricePerDay,
       images: car.images || [],
       features: car.features || [],
-      specifications: car.specifications || {},
-      location: car.location || '',
-      description: car.description || '',
+      specifications: {
+        engine: car.engineSize || '',
+        transmission: car.transmission,
+        fuelType: car.fuelType,
+        seats: car.seats,
+        luggage: car.luggageCapacity || 0,
+        doors: car.doors,
+        airConditioning: true, // Default
+        insurance: car.basicInsuranceIncluded ? 'Basic included' : 'Not included',
+        mileage: car.mileage.toString(),
+        minimumAge: `${car.minimumAge} years`,
+        drivingLicense: `Valid for ${car.minimumLicenseYears}+ years`,
+        deposit: `${car.securityDeposit} MAD`,
+      },
+      location: '', // Not stored in current schema
+      description: '', // Not stored in current schema
       status: car.status,
-      isActive: car.isActive,
+      isActive: car.status === 'available',
       totalBookings: car._count.bookings,
       totalRevenue,
       averageRating: Math.round(averageRating * 10) / 10,
@@ -90,7 +104,7 @@ export async function GET(
 // PUT - Update car (agency owner only)
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Get auth token
@@ -111,10 +125,12 @@ export async function PUT(
       return NextResponse.json({ error: 'Access denied' }, { status: 403 });
     }
 
+    const { id: carId } = await params;
+    
     // Check if car belongs to this agency
     const existingCar = await prisma.car.findFirst({
       where: { 
-        id: params.id,
+        id: carId,
         agencyId: agency.id
       }
     });
@@ -127,20 +143,18 @@ export async function PUT(
 
     // Update the car
     const updatedCar = await prisma.car.update({
-      where: { id: params.id },
+      where: { id: carId },
       data: {
         make: carData.make || existingCar.make,
         model: carData.model || existingCar.model,
         year: carData.year ? parseInt(carData.year) : existingCar.year,
         category: carData.category || existingCar.category,
-        pricePerDay: carData.pricePerDay ? parseFloat(carData.pricePerDay) : existingCar.pricePerDay,
+        basePricePerDay: carData.pricePerDay ? parseFloat(carData.pricePerDay) : existingCar.basePricePerDay,
         images: carData.images !== undefined ? carData.images : existingCar.images,
         features: carData.features !== undefined ? carData.features : existingCar.features,
-        specifications: carData.specifications !== undefined ? carData.specifications : existingCar.specifications,
-        location: carData.location !== undefined ? carData.location : existingCar.location,
-        description: carData.description !== undefined ? carData.description : existingCar.description,
+        // specifications, location, description not in current schema
         status: carData.status || existingCar.status,
-        isActive: carData.isActive !== undefined ? carData.isActive : existingCar.isActive,
+        // isActive is derived from status, not a separate field
         updatedAt: new Date()
       },
       include: {
@@ -162,14 +176,27 @@ export async function PUT(
         model: updatedCar.model,
         year: updatedCar.year,
         category: updatedCar.category,
-        pricePerDay: updatedCar.pricePerDay,
+        pricePerDay: updatedCar.basePricePerDay,
         images: updatedCar.images || [],
         features: updatedCar.features || [],
-        specifications: updatedCar.specifications || {},
-        location: updatedCar.location || '',
-        description: updatedCar.description || '',
+        specifications: {
+          engine: updatedCar.engineSize || '',
+          transmission: updatedCar.transmission,
+          fuelType: updatedCar.fuelType,
+          seats: updatedCar.seats,
+          luggage: updatedCar.luggageCapacity || 0,
+          doors: updatedCar.doors,
+          airConditioning: true,
+          insurance: updatedCar.basicInsuranceIncluded ? 'Basic included' : 'Not included',
+          mileage: updatedCar.mileage.toString(),
+          minimumAge: `${updatedCar.minimumAge} years`,
+          drivingLicense: `Valid for ${updatedCar.minimumLicenseYears}+ years`,
+          deposit: `${updatedCar.securityDeposit} MAD`,
+        },
+        location: '', // Not in current schema
+        description: '', // Not in current schema
         status: updatedCar.status,
-        isActive: updatedCar.isActive,
+        isActive: updatedCar.status === 'available',
         agency: updatedCar.agency,
         createdAt: updatedCar.createdAt,
         updatedAt: updatedCar.updatedAt
@@ -187,7 +214,7 @@ export async function PUT(
 // DELETE - Delete car (agency owner only)
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Get auth token
@@ -208,17 +235,19 @@ export async function DELETE(
       return NextResponse.json({ error: 'Access denied' }, { status: 403 });
     }
 
+    const { id: carId } = await params;
+
     // Check if car belongs to this agency
     const existingCar = await prisma.car.findFirst({
       where: { 
-        id: params.id,
+        id: carId,
         agencyId: agency.id
       },
       include: {
         _count: {
           select: { 
             bookings: {
-              where: { status: { in: ['pending', 'confirmed', 'in_progress'] } }
+              where: { status: { in: ['pending', 'confirmed', 'active'] } }
             }
           }
         }
@@ -238,7 +267,7 @@ export async function DELETE(
 
     // Delete the car
     await prisma.car.delete({
-      where: { id: params.id }
+      where: { id: carId }
     });
 
     return NextResponse.json({ success: true });
