@@ -180,8 +180,8 @@ export default function Header({ variant = 'page', className = '' }: HeaderProps
         <div className="md:hidden absolute top-full left-0 right-0 z-40">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className={variant === 'hero' 
-              ? "bg-white/95 backdrop-blur-xl border border-white/20 border-t-0 rounded-b-2xl shadow-lg px-6 py-4 -mt-1"
-              : "bg-white border border-gray-200 border-t-0 rounded-b-2xl shadow-lg px-6 py-4 -mt-1"
+              ? "bg-white/95 backdrop-blur-xl border border-white/20 border-t-0 rounded-b-2xl shadow-lg px-6 py-4 -mt-4"
+              : "bg-white border border-gray-200 border-t-0 rounded-b-2xl shadow-lg px-6 py-4 -mt-4"
             }>
               <div className="space-y-2">
                 <Link 
