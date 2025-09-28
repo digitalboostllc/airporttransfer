@@ -175,72 +175,77 @@ export default function Header({ variant = 'page', className = '' }: HeaderProps
         </div>
       </div>
 
-      {/* Mobile Menu Dropdown */}
+      {/* Mobile Menu Dropdown - App-inspired design */}
       {isMobileMenuOpen && (
-        <div className="md:hidden absolute top-full left-0 right-0 bg-white border-b border-gray-200 shadow-lg z-40">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="py-4 space-y-3">
-              <Link 
-                href="/cars" 
-                className="block px-4 py-3 text-gray-700 hover:text-red-500 hover:bg-gray-50 rounded-lg transition-all duration-200 text-sm font-medium"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Car Rental
-              </Link>
-              <Link 
-                href="/#services" 
-                className="block px-4 py-3 text-gray-700 hover:text-red-500 hover:bg-gray-50 rounded-lg transition-all duration-200 text-sm font-medium"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Services
-              </Link>
-              <Link 
-                href="/#about" 
-                className="block px-4 py-3 text-gray-700 hover:text-red-500 hover:bg-gray-50 rounded-lg transition-all duration-200 text-sm font-medium"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                About
-              </Link>
-              <Link 
-                href="/#contact" 
-                className="block px-4 py-3 text-gray-700 hover:text-red-500 hover:bg-gray-50 rounded-lg transition-all duration-200 text-sm font-medium"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Contact
-              </Link>
-              
-              {/* User menu items for mobile */}
-              {user && (
-                <>
-                  <div className="border-t border-gray-200 pt-3 mt-3">
-                    <Link 
-                      href="/support" 
-                      className="block px-4 py-3 text-blue-700 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-all duration-200 text-sm font-medium"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                    >
-                      Help & Support
-                    </Link>
-                    {user.role === 'admin' && (
+        <div className="md:hidden absolute top-full left-4 right-4 z-40">
+          <div className="max-w-7xl mx-auto">
+            <div className={variant === 'hero' 
+              ? "bg-white/95 backdrop-blur-xl border border-white/20 border-t-0 rounded-b-2xl shadow-lg px-6 py-4"
+              : "bg-white border border-gray-200 border-t-0 rounded-b-2xl shadow-lg px-6 py-4"
+            }>
+              <div className="space-y-2">
+                <Link 
+                  href="/cars" 
+                  className="block px-3 py-3 text-gray-700 hover:text-red-500 hover:bg-red-50/50 rounded-xl transition-all duration-200 text-sm font-medium"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Car Rental
+                </Link>
+                <Link 
+                  href="/#services" 
+                  className="block px-3 py-3 text-gray-700 hover:text-red-500 hover:bg-red-50/50 rounded-xl transition-all duration-200 text-sm font-medium"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Services
+                </Link>
+                <Link 
+                  href="/#about" 
+                  className="block px-3 py-3 text-gray-700 hover:text-red-500 hover:bg-red-50/50 rounded-xl transition-all duration-200 text-sm font-medium"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  About
+                </Link>
+                <Link 
+                  href="/#contact" 
+                  className="block px-3 py-3 text-gray-700 hover:text-red-500 hover:bg-red-50/50 rounded-xl transition-all duration-200 text-sm font-medium"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Contact
+                </Link>
+                
+                {/* User menu items for mobile */}
+                {user && (
+                  <>
+                    <div className="border-t border-gray-200/50 pt-3 mt-3">
                       <Link 
-                        href="/admin/dashboard" 
-                        className="block px-4 py-3 text-purple-700 hover:text-purple-500 hover:bg-purple-50 rounded-lg transition-all duration-200 text-sm font-medium"
+                        href="/support" 
+                        className="block px-3 py-3 text-blue-700 hover:text-blue-500 hover:bg-blue-50/50 rounded-xl transition-all duration-200 text-sm font-medium"
                         onClick={() => setIsMobileMenuOpen(false)}
                       >
-                        Admin Panel
+                        Help & Support
                       </Link>
-                    )}
-                    {user.role === 'agency_owner' && (
-                      <Link 
-                        href="/agency/dashboard" 
-                        className="block px-4 py-3 text-orange-700 hover:text-orange-500 hover:bg-orange-50 rounded-lg transition-all duration-200 text-sm font-medium"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                      >
-                        Dashboard
-                      </Link>
-                    )}
-                  </div>
-                </>
-              )}
+                      {user.role === 'admin' && (
+                        <Link 
+                          href="/admin/dashboard" 
+                          className="block px-3 py-3 text-purple-700 hover:text-purple-500 hover:bg-purple-50/50 rounded-xl transition-all duration-200 text-sm font-medium"
+                          onClick={() => setIsMobileMenuOpen(false)}
+                        >
+                          Admin Panel
+                        </Link>
+                      )}
+                      {user.role === 'agency_owner' && (
+                        <Link 
+                          href="/agency/dashboard" 
+                          className="block px-3 py-3 text-orange-700 hover:text-orange-500 hover:bg-orange-50/50 rounded-xl transition-all duration-200 text-sm font-medium"
+                          onClick={() => setIsMobileMenuOpen(false)}
+                        >
+                          Dashboard
+                        </Link>
+                      )}
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
           </div>
         </div>
