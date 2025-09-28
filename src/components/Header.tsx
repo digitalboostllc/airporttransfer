@@ -36,10 +36,10 @@ export default function Header({ variant = 'page', className = '' }: HeaderProps
           <div className="flex justify-between items-center">
             <Link href="/" className="flex items-center hover:opacity-80 transition-opacity group">
               <TransferLogo 
-                size={44} 
+                size={36} 
                 showText={true}
                 className="group-hover:scale-105 transition-transform duration-300" 
-                textClassName="text-2xl font-extrabold"
+                textClassName="text-xl font-bold"
               />
             </Link>
             
