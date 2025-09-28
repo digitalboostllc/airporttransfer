@@ -545,8 +545,8 @@ function CarListingContent() {
           </div>
 
           {/* Search Form - Part of Hero (Non-Sticky) */}
-          <div id="hero-search-form" className="bg-white/95 backdrop-blur-xl border border-white/20 rounded-2xl shadow-lg p-4 md:p-6 mb-6">
-            <div className="flex flex-col gap-4 lg:flex-row lg:gap-2 lg:items-center">
+          <div id="hero-search-form" className="bg-white/95 backdrop-blur-xl border border-white/20 rounded-2xl shadow-lg p-3 md:p-4 mb-4">
+            <div className="flex flex-col gap-2 lg:flex-row lg:gap-2 lg:items-center">
             
             {/* Pickup Location */}
             <div className="w-full lg:flex-1 lg:min-w-0">
@@ -556,7 +556,7 @@ function CarListingContent() {
                     variant="outline"
                     role="combobox"
                     aria-expanded={isLocationOpen}
-                    className="w-full justify-between text-left h-12 bg-white hover:bg-gray-50 border-gray-300"
+                    className="w-full justify-between text-left h-10 bg-white hover:bg-gray-50 border-gray-300"
                   >
                     <div className="flex flex-col items-start min-w-0">
                       <span className="text-xs text-gray-500 font-medium">Pick-up</span>
@@ -595,7 +595,7 @@ function CarListingContent() {
             <div className="w-full lg:flex-1 lg:min-w-0">
               <Button
                 variant="outline"
-                className="w-full justify-start text-left h-12 bg-white hover:bg-gray-50 border-gray-300"
+                className="w-full justify-start text-left h-10 bg-white hover:bg-gray-50 border-gray-300"
                 disabled
               >
                 <div className="flex flex-col items-start">
@@ -611,7 +611,7 @@ function CarListingContent() {
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
-                    className="w-full justify-start text-left h-12 bg-white hover:bg-gray-50 border-gray-300"
+                    className="w-full justify-start text-left h-10 bg-white hover:bg-gray-50 border-gray-300"
                   >
                     <div className="flex flex-col items-start min-w-0">
                       <span className="text-xs text-gray-500 font-medium">Rental dates</span>
@@ -626,21 +626,21 @@ function CarListingContent() {
                     <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-[95vw] max-w-[700px] p-0" align="start">
-                  <div className="p-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <PopoverContent className="w-[95vw] max-w-[600px] p-0" align="start">
+                  <div className="p-3">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Pickup Date</label>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">Pickup Date</label>
                         <Calendar
                           mode="single"
                           selected={searchFormData.pickupDate}
                           onSelect={(date) => handleSearchFormChange('pickupDate', date)}
                           disabled={(date) => date < new Date()}
-                          className="rounded-md border"
+                          className="rounded-md border text-sm"
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Return Date</label>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">Return Date</label>
                         <Calendar
                           mode="single"
                           selected={searchFormData.returnDate}
@@ -648,15 +648,15 @@ function CarListingContent() {
                           disabled={(date) => 
                             date < new Date() || (searchFormData.pickupDate ? date < searchFormData.pickupDate : false)
                           }
-                          className="rounded-md border"
+                          className="rounded-md border text-sm"
                         />
                       </div>
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3 border-t">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Pickup time</label>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">Pickup time</label>
                         <Select value={searchFormData.pickupTime} onValueChange={(value) => handleSearchFormChange('pickupTime', value)}>
-                          <SelectTrigger>
+                          <SelectTrigger className="h-8 text-sm">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -672,9 +672,9 @@ function CarListingContent() {
                         </Select>
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Drop-off time</label>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">Drop-off time</label>
                         <Select value={searchFormData.returnTime} onValueChange={(value) => handleSearchFormChange('returnTime', value)}>
-                          <SelectTrigger>
+                          <SelectTrigger className="h-8 text-sm">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -690,17 +690,18 @@ function CarListingContent() {
                         </Select>
                       </div>
                     </div>
-                    <div className="flex justify-between items-center pt-4 border-t">
-                      <div className="text-sm text-gray-600">
+                    <div className="flex justify-between items-center pt-3 border-t">
+                      <div className="text-xs text-gray-600">
                         Total: {searchFormData.pickupDate && searchFormData.returnDate ? 
                           Math.max(1, Math.ceil((searchFormData.returnDate.getTime() - searchFormData.pickupDate.getTime()) / (1000 * 60 * 60 * 24))) : 0
                         } days
                       </div>
                       <Button 
                         onClick={() => setIsPickupDateOpen(false)}
-                        className="bg-green-600 hover:bg-green-700"
+                        size="sm"
+                        className="bg-green-600 hover:bg-green-700 text-xs"
                       >
-                        <CarIcon className="w-4 h-4 mr-2" />
+                        <CarIcon className="w-3 h-3 mr-1" />
                         Search Cars
                       </Button>
                     </div>
@@ -715,7 +716,7 @@ function CarListingContent() {
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
-                    className="w-full lg:w-auto h-12 px-4 bg-white hover:bg-gray-50 border-gray-300"
+                    className="w-full lg:w-auto h-10 px-3 bg-white hover:bg-gray-50 border-gray-300"
                   >
                     <SlidersHorizontal className="w-4 h-4 mr-2" />
                     Filters
@@ -740,10 +741,10 @@ function CarListingContent() {
                     <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-[95vw] max-w-[600px] p-0" align="end">
-                  <div className="p-6 space-y-4">
+                <PopoverContent className="w-[95vw] max-w-[500px] p-0" align="end">
+                  <div className="p-4 space-y-3">
                     <div className="flex items-center justify-between">
-                      <h3 className="font-semibold text-gray-900">Filters</h3>
+                      <h3 className="font-semibold text-gray-900 text-sm">Filters</h3>
                       <Button
                         variant="ghost"
                         size="sm"
@@ -758,43 +759,43 @@ function CarListingContent() {
                           });
                           handleSearchFormChange('carCategory', 'all');
                         }}
-                        className="text-xs text-gray-500 hover:text-gray-700"
+                        className="text-xs text-gray-500 hover:text-gray-700 h-6 px-2"
                       >
                         Clear all
                       </Button>
                     </div>
 
                     {/* Responsive Column Layout */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
                       {/* Left Column */}
-                      <div className="space-y-4">
+                      <div className="space-y-3">
                         {/* Price Range */}
-                        <div className="space-y-2">
-                          <label className="block text-sm font-medium text-gray-700">Price per day (MAD)</label>
+                        <div className="space-y-1">
+                          <label className="block text-xs font-medium text-gray-700">Price per day (MAD)</label>
                           <div className="flex items-center space-x-2">
                             <Input
                               type="number"
                               placeholder="Min"
                               value={filters.priceRange[0]}
                               onChange={(e) => handleFilterChange('priceRange', [parseInt(e.target.value) || 0, filters.priceRange[1]])}
-                              className="w-20 text-sm"
+                              className="w-16 text-xs h-8"
                             />
-                            <span className="text-gray-400">-</span>
+                            <span className="text-gray-400 text-xs">-</span>
                             <Input
                               type="number"
                               placeholder="Max"
                               value={filters.priceRange[1]}
                               onChange={(e) => handleFilterChange('priceRange', [filters.priceRange[0], parseInt(e.target.value) || 1000])}
-                              className="w-20 text-sm"
+                              className="w-16 text-xs h-8"
                             />
                           </div>
                         </div>
 
                         {/* Transmission */}
-                        <div className="space-y-2">
-                          <label className="block text-sm font-medium text-gray-700">Transmission</label>
+                        <div className="space-y-1">
+                          <label className="block text-xs font-medium text-gray-700">Transmission</label>
                           <Select value={filters.transmission} onValueChange={(value) => handleFilterChange('transmission', value)}>
-                            <SelectTrigger className="w-full">
+                            <SelectTrigger className="w-full h-8 text-xs">
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
@@ -806,10 +807,10 @@ function CarListingContent() {
                         </div>
 
                         {/* Fuel Type */}
-                        <div className="space-y-2">
-                          <label className="block text-sm font-medium text-gray-700">Fuel Type</label>
+                        <div className="space-y-1">
+                          <label className="block text-xs font-medium text-gray-700">Fuel Type</label>
                           <Select value={filters.fuelType} onValueChange={(value) => handleFilterChange('fuelType', value)}>
-                            <SelectTrigger className="w-full">
+                            <SelectTrigger className="w-full h-8 text-xs">
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
@@ -823,12 +824,12 @@ function CarListingContent() {
                       </div>
 
                       {/* Right Column */}
-                      <div className="space-y-4">
+                      <div className="space-y-3">
                         {/* Number of Seats */}
-                        <div className="space-y-2">
-                          <label className="block text-sm font-medium text-gray-700">Number of Seats</label>
+                        <div className="space-y-1">
+                          <label className="block text-xs font-medium text-gray-700">Number of Seats</label>
                           <Select value={filters.seats} onValueChange={(value) => handleFilterChange('seats', value)}>
-                            <SelectTrigger className="w-full">
+                            <SelectTrigger className="w-full h-8 text-xs">
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
@@ -842,10 +843,10 @@ function CarListingContent() {
                         </div>
 
                         {/* Agency */}
-                        <div className="space-y-2">
-                          <label className="block text-sm font-medium text-gray-700">Rental Agency</label>
+                        <div className="space-y-1">
+                          <label className="block text-xs font-medium text-gray-700">Rental Agency</label>
                           <Select value={filters.agency} onValueChange={(value) => handleFilterChange('agency', value)}>
-                            <SelectTrigger className="w-full">
+                            <SelectTrigger className="w-full h-8 text-xs">
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
@@ -858,10 +859,11 @@ function CarListingContent() {
                         </div>
 
                         {/* Apply Filters Button */}
-                        <div className="pt-6">
+                        <div className="pt-3">
                           <Button 
                             onClick={() => setIsFiltersOpen(false)}
-                            className="w-full bg-green-600 hover:bg-green-700"
+                            size="sm"
+                            className="w-full bg-green-600 hover:bg-green-700 text-xs h-8"
                           >
                             Apply Filters
                           </Button>
@@ -875,7 +877,7 @@ function CarListingContent() {
 
             {/* Results Count - Mobile and Desktop */}
             <div className="w-full lg:w-auto">
-              <div className="flex items-center justify-center lg:justify-start text-sm text-gray-600 lg:ml-2 mt-2 lg:mt-0">
+              <div className="flex items-center justify-center lg:justify-start text-xs text-gray-600 lg:ml-2 mt-1 lg:mt-0">
                 <span className="font-medium">{filteredCars.length}</span>
                 <span className="ml-1">cars available</span>
               </div>
@@ -887,7 +889,7 @@ function CarListingContent() {
 
       {/* Sticky Search Section - Clean Minimal Version */}
       <div className="sticky top-0 z-30 bg-white border-b border-gray-200 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
           <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 text-sm">
             {/* Search Summary - Mobile Stack, Desktop Row */}
             <div className="flex flex-col sm:flex-row sm:items-center gap-2 flex-1 min-w-0">
@@ -929,9 +931,9 @@ function CarListingContent() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         {/* Mobile Results Header */}
-        <div className="lg:hidden mb-6">
+        <div className="lg:hidden mb-4">
           <div className="text-sm text-gray-600">
             <span className="font-medium">{filteredCars.length}</span> cars available in {searchFormData.location}
             {searchFormData.pickupDate && searchFormData.returnDate && (
@@ -943,15 +945,15 @@ function CarListingContent() {
         </div>
 
         {/* Compact view without large header */}
-        <div className="hidden lg:block mb-6">
+        <div className="hidden lg:block mb-4">
           <div className="text-sm text-gray-500">
             Showing results for {searchFormData.location}
           </div>
         </div>
 
         {/* Car Categories Row - Small Cards like Homepage */}
-        <div className="mb-6">
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3">
+        <div className="mb-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
             {[
               { id: 'all', name: 'All Categories', color: 'bg-gray-50 border-gray-200' },
               { id: 'economy', name: 'Economy', color: 'bg-blue-50 border-blue-200' },
@@ -977,8 +979,8 @@ function CarListingContent() {
           </div>
         </div>
 
-        <div className="mb-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="mb-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div className="hidden">
             </div>
 
