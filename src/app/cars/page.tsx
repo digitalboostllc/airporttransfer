@@ -545,11 +545,11 @@ function CarListingContent() {
           </div>
 
           {/* Search Form - Part of Hero (Non-Sticky) */}
-          <div id="hero-search-form" className="bg-white/95 backdrop-blur-xl border border-white/20 rounded-2xl shadow-lg p-6 mb-6">
-            <div className="flex flex-col lg:flex-row gap-3 lg:gap-2 items-center">
+          <div id="hero-search-form" className="bg-white/95 backdrop-blur-xl border border-white/20 rounded-2xl shadow-lg p-4 md:p-6 mb-6">
+            <div className="flex flex-col gap-4 lg:flex-row lg:gap-2 lg:items-center">
             
             {/* Pickup Location */}
-            <div className="flex-1 min-w-0">
+            <div className="w-full lg:flex-1 lg:min-w-0">
               <Popover open={isLocationOpen} onOpenChange={setIsLocationOpen}>
                 <PopoverTrigger asChild>
                   <Button
@@ -592,7 +592,7 @@ function CarListingContent() {
             </div>
 
             {/* Drop-off Location */}
-            <div className="flex-1 min-w-0">
+            <div className="w-full lg:flex-1 lg:min-w-0">
               <Button
                 variant="outline"
                 className="w-full justify-start text-left h-12 bg-white hover:bg-gray-50 border-gray-300"
@@ -606,7 +606,7 @@ function CarListingContent() {
             </div>
 
             {/* Rental Dates */}
-            <div className="flex-1 min-w-0">
+            <div className="w-full lg:flex-1 lg:min-w-0">
               <Popover open={isPickupDateOpen} onOpenChange={setIsPickupDateOpen}>
                 <PopoverTrigger asChild>
                   <Button
@@ -710,12 +710,12 @@ function CarListingContent() {
             </div>
 
             {/* Filters Dropdown */}
-            <div>
+            <div className="w-full lg:w-auto">
               <Popover open={isFiltersOpen} onOpenChange={setIsFiltersOpen}>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
-                    className="h-12 px-4 bg-white hover:bg-gray-50 border-gray-300"
+                    className="w-full lg:w-auto h-12 px-4 bg-white hover:bg-gray-50 border-gray-300"
                   >
                     <SlidersHorizontal className="w-4 h-4 mr-2" />
                     Filters
@@ -873,10 +873,12 @@ function CarListingContent() {
               </Popover>
             </div>
 
-            {/* Results Count */}
-            <div className="hidden lg:flex items-center text-sm text-gray-600 ml-2">
-              <span className="font-medium">{filteredCars.length}</span>
-              <span className="ml-1">cars available</span>
+            {/* Results Count - Mobile and Desktop */}
+            <div className="w-full lg:w-auto">
+              <div className="flex items-center justify-center lg:justify-start text-sm text-gray-600 lg:ml-2 mt-2 lg:mt-0">
+                <span className="font-medium">{filteredCars.length}</span>
+                <span className="ml-1">cars available</span>
+              </div>
             </div>
           </div>
           </div>
@@ -885,38 +887,41 @@ function CarListingContent() {
 
       {/* Sticky Search Section - Clean Minimal Version */}
       <div className="sticky top-0 z-30 bg-white border-b border-gray-200 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
-          <div className="flex items-center gap-3 text-sm">
-            {/* Location Summary */}
-            <div className="flex items-center gap-2">
-              <MapPin className="w-4 h-4 text-gray-400" />
-              <span className="font-medium text-gray-900">{searchFormData.location}</span>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 text-sm">
+            {/* Search Summary - Mobile Stack, Desktop Row */}
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 flex-1 min-w-0">
+              {/* Location Summary */}
+              <div className="flex items-center gap-2">
+                <MapPin className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                <span className="font-medium text-gray-900 truncate">{searchFormData.location}</span>
+              </div>
+              
+              {/* Dates Summary */}
+              {searchFormData.pickupDate && searchFormData.returnDate && (
+                <div className="flex items-center gap-2">
+                  <CalendarIcon className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                  <span className="text-gray-600">
+                    {format(searchFormData.pickupDate, 'MMM dd')} - {format(searchFormData.returnDate, 'MMM dd')}
+                  </span>
+                </div>
+              )}
+              
+              {/* Category Summary */}
+              {searchFormData.carCategory !== 'all' && (
+                <div className="flex items-center gap-2">
+                  <CarIcon className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                  <span className="text-gray-600 capitalize">{searchFormData.carCategory}</span>
+                </div>
+              )}
             </div>
-            
-            {/* Dates Summary */}
-            {searchFormData.pickupDate && searchFormData.returnDate && (
-              <div className="flex items-center gap-2">
-                <CalendarIcon className="w-4 h-4 text-gray-400" />
-                <span className="text-gray-600">
-                  {format(searchFormData.pickupDate, 'MMM dd')} - {format(searchFormData.returnDate, 'MMM dd')}
-                </span>
-              </div>
-            )}
-            
-            {/* Category Summary */}
-            {searchFormData.carCategory !== 'all' && (
-              <div className="flex items-center gap-2">
-                <CarIcon className="w-4 h-4 text-gray-400" />
-                <span className="text-gray-600 capitalize">{searchFormData.carCategory}</span>
-              </div>
-            )}
             
             {/* Quick Modify Button */}
             <Button 
               variant="outline" 
               size="sm"
               onClick={() => document.getElementById('hero-search-form')?.scrollIntoView({ behavior: 'smooth' })}
-              className="ml-auto"
+              className="w-full sm:w-auto"
             >
               Modify Search
             </Button>
@@ -946,7 +951,7 @@ function CarListingContent() {
 
         {/* Car Categories Row - Small Cards like Homepage */}
         <div className="mb-6">
-          <div className="grid grid-cols-5 gap-2">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3">
             {[
               { id: 'all', name: 'All Categories', color: 'bg-gray-50 border-gray-200' },
               { id: 'economy', name: 'Economy', color: 'bg-blue-50 border-blue-200' },
@@ -957,16 +962,16 @@ function CarListingContent() {
               <div
                 key={category.id}
                 className={cn(
-                  "car-3d-card p-2 rounded-lg text-center cursor-pointer border-2 transition-all duration-300",
+                  "car-3d-card p-2 sm:p-3 rounded-lg text-center cursor-pointer border-2 transition-all duration-300",
                   searchFormData.carCategory === category.id ? "ring-2 ring-red-500 border-red-300" : "",
                   category.color
                 )}
                 onClick={() => handleSearchFormChange('carCategory', category.id)}
               >
-                <div className="car-3d-icon w-5 h-5 mx-auto mb-1 flex items-center justify-center">
-                  <CarIcon className="w-4 h-4 text-gray-700" />
+                <div className="car-3d-icon w-5 h-5 sm:w-6 sm:h-6 mx-auto mb-1 sm:mb-2 flex items-center justify-center">
+                  <CarIcon className="w-4 h-4 sm:w-5 sm:h-5 text-gray-700" />
                 </div>
-                <h4 className="font-semibold text-gray-800 text-xs">{category.name}</h4>
+                <h4 className="font-semibold text-gray-800 text-xs sm:text-sm">{category.name}</h4>
               </div>
             ))}
           </div>
