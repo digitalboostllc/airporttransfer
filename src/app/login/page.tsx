@@ -3,7 +3,8 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Eye, EyeOff, Mail, Lock, Car, ArrowRight } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, ArrowRight } from 'lucide-react';
+import TransferLogo from '@/components/TransferLogo';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/contexts/AuthContext';
@@ -73,8 +74,12 @@ export default function LoginPage() {
           {/* Header */}
           <div className="text-center mb-8">
             <Link href="/" className="inline-flex items-center text-white hover:text-orange-200 transition-colors">
-              <Car className="w-8 h-8 mr-2" />
-              <span className="text-2xl font-bold">CarRental</span>
+              <TransferLogo 
+                size={40} 
+                showText={true}
+                textClassName="text-2xl text-white"
+                iconClassName="shadow-xl"
+              />
             </Link>
             <h1 className="mt-6 text-3xl font-bold text-white">
               Welcome back
@@ -217,7 +222,7 @@ export default function LoginPage() {
           {/* Footer */}
           <div className="mt-8 text-center">
             <p className="text-white/60 text-xs">
-              © 2024 CarRental. All rights reserved.
+              © 2024 Venboo. All rights reserved.
             </p>
           </div>
         </div>

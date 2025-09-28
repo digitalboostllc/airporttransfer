@@ -5,7 +5,7 @@ import { Phone, User, LogOut, Settings, Menu, X } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
-import VenbooLogo from '@/components/VenbooLogo';
+import TransferLogo from '@/components/TransferLogo';
 
 interface HeaderProps {
   variant?: 'hero' | 'page';
@@ -34,11 +34,13 @@ export default function Header({ variant = 'page', className = '' }: HeaderProps
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className={containerClasses}>
           <div className="flex justify-between items-center">
-            <Link href="/" className="flex items-center space-x-3 hover:opacity-80 transition-opacity group">
-              <VenbooLogo size={32} className="group-hover:scale-105 transition-transform duration-300" />
-              <div>
-                <div className="text-lg font-bold text-gray-800 tracking-tight">Venboo</div>
-              </div>
+            <Link href="/" className="flex items-center hover:opacity-80 transition-opacity group">
+              <TransferLogo 
+                size={32} 
+                showText={true}
+                className="group-hover:scale-105 transition-transform duration-300" 
+                textClassName="text-lg"
+              />
             </Link>
             
             {/* Desktop Navigation */}

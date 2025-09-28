@@ -3,7 +3,8 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Eye, EyeOff, Mail, Lock, User, Phone, Car, Building2, ArrowRight, CheckCircle } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, User, Phone, Building2, ArrowRight, CheckCircle } from 'lucide-react';
+import TransferLogo from '@/components/TransferLogo';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/contexts/AuthContext';
@@ -152,8 +153,12 @@ function RegisterPageContent() {
           {/* Header */}
           <div className="text-center mb-8">
             <Link href="/" className="inline-flex items-center text-white hover:text-orange-200 transition-colors">
-              <Car className="w-8 h-8 mr-2" />
-              <span className="text-2xl font-bold">CarRental</span>
+              <TransferLogo 
+                size={40} 
+                showText={true}
+                textClassName="text-2xl text-white"
+                iconClassName="shadow-xl"
+              />
             </Link>
             <h1 className="mt-6 text-3xl font-bold text-white">
               Create your account
