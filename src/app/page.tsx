@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   CheckCircle,
   Plane,
@@ -26,7 +26,9 @@ import {
   MessageSquare,
   UserCheck,
   ArrowRight,
-  Shield
+  Shield,
+  CreditCard,
+  CheckCircle2
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -41,6 +43,7 @@ import Image from "next/image";
 import dynamic from 'next/dynamic';
 import AddressInput from '@/components/AddressInput';
 import Header from '@/components/Header';
+import PaymentForm from '@/components/PaymentForm';
 
 // Dynamically import RouteMap to avoid SSR issues
 const RouteMap = dynamic(() => import('@/components/RouteMap'), {
@@ -70,6 +73,13 @@ export default function Home() {
     phone: '',
     email: ''
   });
+
+  // Payment and booking flow states
+  const [bookingStep, setBookingStep] = useState<'details' | 'payment' | 'success' | 'error'>('details');
+  const [calculatedPrice, setCalculatedPrice] = useState<number>(0);
+  const [paymentIntentId, setPaymentIntentId] = useState<string | null>(null);
+  const [bookingError, setBookingError] = useState<string | null>(null);
+  const [isFormValid, setIsFormValid] = useState(false);
 
   // Car rental specific state
   const [rentalFormData, setRentalFormData] = useState({
@@ -112,6 +122,50 @@ export default function Home() {
     suv: 350,
     van: 500
   });
+
+  // Enhanced price calculation for payment
+  const calculateExactPrice = useCallback((vehicleType: string, distance?: string): number => {
+    if (!distance || !vehicleType) return estimatedPrices[vehicleType as keyof typeof estimatedPrices] || 250;
+    
+    // Extract distance number (assuming format like "25.4 km")
+    const distanceNum = parseFloat(distance.replace(/[^0-9.]/g, '')) || 0;
+    
+    // Base rates per km + base fee
+    const rates = {
+      sedan: { baseRate: 8, baseFee: 50 },
+      suv: { baseRate: 10, baseFee: 70 },
+      van: { baseRate: 12, baseFee: 90 }
+    };
+    
+    const rate = rates[vehicleType as keyof typeof rates] || rates.sedan;
+    const price = rate.baseFee + (distanceNum * rate.baseRate);
+    
+    return Math.round(price);
+  }, [estimatedPrices]);
+
+
+  // Update calculated price when route or vehicle changes
+  useEffect(() => {
+    if (formData.vehicle && routeInfo?.distance) {
+      const exactPrice = calculateExactPrice(formData.vehicle, routeInfo.distance);
+      setCalculatedPrice(exactPrice);
+    } else if (formData.vehicle) {
+      setCalculatedPrice(estimatedPrices[formData.vehicle as keyof typeof estimatedPrices] || 250);
+    }
+  }, [formData.vehicle, routeInfo?.distance, calculateExactPrice, estimatedPrices]);
+
+  // Update form validation
+  useEffect(() => {
+    const isValid = !!(formData.pickup && 
+                      formData.destination && 
+                      formData.date && 
+                      formData.time && 
+                      formData.vehicle && 
+                      formData.name && 
+                      formData.phone && 
+                      formData.email);
+    setIsFormValid(isValid);
+  }, [formData]);
 
   const [isTimePickerOpen, setIsTimePickerOpen] = useState(false);
 
@@ -269,8 +323,54 @@ export default function Home() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Booking request:', formData);
-    alert('Thank you for your booking request! We will contact you shortly.');
+    
+    if (!isFormValid) {
+      setBookingError('Please fill in all required fields');
+      return;
+    }
+
+    if (calculatedPrice <= 0) {
+      setBookingError('Unable to calculate price. Please try again.');
+      return;
+    }
+
+    // Move to payment step
+    setBookingStep('payment');
+    setBookingError(null);
+  };
+
+  // Handle payment success
+  const handlePaymentSuccess = async (paymentIntent: { id: string; amount: number; currency: string; status: string }) => {
+    try {
+      setPaymentIntentId(paymentIntent.id);
+      
+      // Here you would typically save the booking to your database
+      console.log('Booking confirmed:', {
+        ...formData,
+        paymentIntentId: paymentIntent.id,
+        amount: calculatedPrice,
+        routeInfo
+      });
+      
+      setBookingStep('success');
+    } catch (error) {
+      console.error('Error saving booking:', error);
+      setBookingError('Payment successful but booking save failed. Please contact support.');
+      setBookingStep('error');
+    }
+  };
+
+  // Handle payment error
+  const handlePaymentError = (error: string) => {
+    setBookingError(error);
+    setBookingStep('error');
+  };
+
+  // Reset booking flow
+  const resetBooking = () => {
+    setBookingStep('details');
+    setBookingError(null);
+    setPaymentIntentId(null);
   };
 
   const handleRentalSubmit = (e: React.FormEvent) => {
@@ -464,7 +564,32 @@ export default function Home() {
 
               {/* Transfer Form */}
               {activeService === 'transfer' && (
-                <form onSubmit={handleSubmit} className="space-y-3">
+                <div className="space-y-3">
+                  {/* Step Indicator */}
+                  <div className="flex items-center justify-center gap-2 mb-4">
+                    <div className={cn(
+                      "w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300",
+                      bookingStep === 'details' ? "bg-red-500 text-white" : 
+                      ['payment', 'success', 'error'].includes(bookingStep) ? "bg-green-500 text-white" : "bg-gray-200 text-gray-600"
+                    )}>
+                      {['payment', 'success', 'error'].includes(bookingStep) ? <Check className="w-4 h-4" /> : '1'}
+                    </div>
+                    <div className={cn(
+                      "h-1 w-8 rounded transition-all duration-300",
+                      ['payment', 'success', 'error'].includes(bookingStep) ? "bg-green-500" : "bg-gray-200"
+                    )}></div>
+                    <div className={cn(
+                      "w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300",
+                      bookingStep === 'payment' ? "bg-red-500 text-white" : 
+                      ['success', 'error'].includes(bookingStep) ? "bg-green-500 text-white" : "bg-gray-200 text-gray-600"
+                    )}>
+                      {['success', 'error'].includes(bookingStep) ? <Check className="w-4 h-4" /> : <CreditCard className="w-4 h-4" />}
+                    </div>
+                  </div>
+
+                  {/* Booking Details Step */}
+                  {bookingStep === 'details' && (
+                    <form onSubmit={handleSubmit} className="space-y-3">
                 {/* Step 1: Route & Time */}
                 <div className="form-step space-y-1.5">
                   <div className="flex items-center gap-1.5 mb-1.5">
@@ -716,9 +841,13 @@ export default function Home() {
                 <div className="form-step pt-1">
                   <button
                     type="submit"
-                    className="w-full premium-button text-white font-bold px-4 py-2.5 rounded-lg text-xs tracking-wide transition-all duration-300 flex items-center justify-center"
+                    disabled={!isFormValid}
+                    className={cn(
+                      "w-full premium-button text-white font-bold px-4 py-2.5 rounded-lg text-xs tracking-wide transition-all duration-300 flex items-center justify-center",
+                      !isFormValid && "opacity-50 cursor-not-allowed"
+                    )}
                   >
-                    Book My Ride Now
+                    {calculatedPrice > 0 ? `Continue to Payment (${calculatedPrice} MAD)` : 'Book My Ride Now'}
                   </button>
                   <div className="flex items-center justify-center gap-2 text-xs text-gray-500 mt-1.5">
                     <div className="flex items-center gap-0.5">
@@ -736,6 +865,166 @@ export default function Home() {
                   </div>
                 </div>
               </form>
+                  )}
+
+                  {/* Payment Step */}
+                  {bookingStep === 'payment' && (
+                    <div className="space-y-4">
+                      {/* Booking Summary */}
+                      <div className="bg-gray-50 rounded-lg p-3 space-y-2">
+                        <h3 className="text-sm font-semibold text-gray-800 flex items-center gap-2">
+                          <CheckCircle2 className="w-4 h-4 text-green-500" />
+                          Booking Summary
+                        </h3>
+                        <div className="space-y-1 text-xs text-gray-600">
+                          <div className="flex justify-between">
+                            <span>Route:</span>
+                            <span className="font-medium">{formData.pickup.split(',')[0]} → {formData.destination.split(',')[0]}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Date & Time:</span>
+                            <span className="font-medium">{formData.date ? format(formData.date, 'MMM dd') : ''} at {formData.time}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Vehicle:</span>
+                            <span className="font-medium capitalize">{formData.vehicle} ({formData.passengers} passenger{formData.passengers !== '1' ? 's' : ''})</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Customer:</span>
+                            <span className="font-medium">{formData.name}</span>
+                          </div>
+                          {routeInfo && (
+                            <div className="flex justify-between">
+                              <span>Distance:</span>
+                              <span className="font-medium">{routeInfo.distance}</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Payment Form */}
+                      <PaymentForm
+                        paymentData={{
+                          amount: calculatedPrice,
+                          currency: 'mad',
+                          description: `Airport Transfer: ${formData.pickup.split(',')[0]} to ${formData.destination.split(',')[0]}`,
+                          metadata: {
+                            pickup: formData.pickup,
+                            destination: formData.destination,
+                            date: formData.date?.toISOString() || '',
+                            time: formData.time,
+                            vehicle: formData.vehicle,
+                            passengers: formData.passengers,
+                            customer_name: formData.name,
+                            customer_phone: formData.phone,
+                            customer_email: formData.email,
+                            distance: routeInfo?.distance || '',
+                            duration: routeInfo?.duration || ''
+                          }
+                        }}
+                        onSuccess={handlePaymentSuccess}
+                        onError={handlePaymentError}
+                        className="w-full"
+                      />
+
+                      {/* Back Button */}
+                      <Button
+                        onClick={resetBooking}
+                        variant="outline"
+                        className="w-full border-gray-300 text-gray-700 hover:bg-gray-50"
+                      >
+                        ← Back to Details
+                      </Button>
+                    </div>
+                  )}
+
+                  {/* Success Step */}
+                  {bookingStep === 'success' && (
+                    <div className="space-y-4 text-center">
+                      <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto">
+                        <CheckCircle2 className="w-8 h-8 text-green-600" />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-bold text-gray-800 mb-2">Booking Confirmed!</h3>
+                        <p className="text-sm text-gray-600 mb-4">
+                          Your transfer has been booked successfully. You will receive a confirmation email shortly.
+                        </p>
+                        <div className="bg-green-50 rounded-lg p-3 space-y-1 text-xs text-green-700">
+                          <div className="flex justify-between">
+                            <span>Booking ID:</span>
+                            <span className="font-mono">{paymentIntentId?.slice(-8).toUpperCase()}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Amount Paid:</span>
+                            <span className="font-bold">{calculatedPrice} MAD</span>
+                          </div>
+                        </div>
+                      </div>
+                      <Button
+                        onClick={() => {
+                          resetBooking();
+                          setFormData({
+                            pickup: 'Mohammed V International Airport, Casablanca',
+                            destination: '',
+                            date: undefined,
+                            time: '',
+                            passengers: '1',
+                            vehicle: '',
+                            name: '',
+                            phone: '',
+                            email: ''
+                          });
+                        }}
+                        className="w-full bg-green-600 hover:bg-green-700 text-white"
+                      >
+                        Book Another Transfer
+                      </Button>
+                    </div>
+                  )}
+
+                  {/* Error Step */}
+                  {bookingStep === 'error' && (
+                    <div className="space-y-4 text-center">
+                      <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto">
+                        <X className="w-8 h-8 text-red-600" />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-bold text-gray-800 mb-2">Booking Failed</h3>
+                        <p className="text-sm text-gray-600 mb-4">
+                          {bookingError || 'Something went wrong. Please try again.'}
+                        </p>
+                      </div>
+                      <div className="space-y-2">
+                        <Button
+                          onClick={resetBooking}
+                          className="w-full bg-red-600 hover:bg-red-700 text-white"
+                        >
+                          Try Again
+                        </Button>
+                        <Button
+                          onClick={() => {
+                            resetBooking();
+                            setFormData({
+                              pickup: 'Mohammed V International Airport, Casablanca',
+                              destination: '',
+                              date: undefined,
+                              time: '',
+                              passengers: '1',
+                              vehicle: '',
+                              name: '',
+                              phone: '',
+                              email: ''
+                            });
+                          }}
+                          variant="outline"
+                          className="w-full border-gray-300 text-gray-700 hover:bg-gray-50"
+                        >
+                          Start Over
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </div>
               )}
 
               {/* Car Rental Form */}

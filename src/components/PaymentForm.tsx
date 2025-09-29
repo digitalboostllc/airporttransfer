@@ -1,216 +1,267 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { loadStripe } from '@stripe/stripe-js';
 import {
-  PaymentElement,
   Elements,
+  CardElement,
   useStripe,
   useElements
 } from '@stripe/react-stripe-js';
-import { loadStripe } from '@stripe/stripe-js';
 import { Button } from '@/components/ui/button';
-import { Loader2, CreditCard, CheckCircle, AlertCircle, Lock } from 'lucide-react';
-import { formatPrice } from '@/lib/stripe';
+import { CreditCard, Lock, Check, X, Loader2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
-// Load Stripe outside of component to avoid recreating on every render
+// Initialize Stripe
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
-interface PaymentFormProps {
+interface PaymentData {
+  amount: number;
+  currency: string;
+  description: string;
+  metadata: Record<string, string>;
+}
+
+interface PaymentIntent {
+  id: string;
+  amount: number;
+  currency: string;
+  status: string;
+  client_secret: string;
+}
+
+// Props for new transfer booking flow
+interface TransferPaymentProps {
+  paymentData: PaymentData;
+  onSuccess: (paymentIntent: PaymentIntent) => void;
+  onError: (error: string) => void;
+  className?: string;
+  disabled?: boolean;
+}
+
+// Props for existing car booking flow  
+interface CarPaymentProps {
   clientSecret: string;
   amount: number;
-  currency?: string;
+  currency: string;
   bookingReference: string;
-  onSuccess: () => void;
+  onSuccess: () => Promise<void>;
   onError: (error: string) => void;
+  className?: string;
+  disabled?: boolean;
 }
 
-interface CheckoutFormProps {
-  amount: number;
-  currency?: string;
-  bookingReference: string;
-  onSuccess: () => void;
-  onError: (error: string) => void;
-}
+// Union type for all payment form props
+type PaymentFormProps = TransferPaymentProps | CarPaymentProps;
 
-function CheckoutForm({ amount, currency = 'MAD', bookingReference, onSuccess, onError }: CheckoutFormProps) {
+// Type guard functions
+const isTransferPayment = (props: PaymentFormProps): props is TransferPaymentProps => {
+  return 'paymentData' in props;
+};
+
+const isCarPayment = (props: PaymentFormProps): props is CarPaymentProps => {
+  return 'clientSecret' in props;
+};
+
+const CheckoutForm: React.FC<PaymentFormProps> = (props) => {
   const stripe = useStripe();
   const elements = useElements();
-  const [isLoading, setIsLoading] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [cardComplete, setCardComplete] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!stripe) return;
+  // Extract common props
+  const { onSuccess, onError, disabled = false } = props;
+  
+  // Determine payment type and extract specific props
+  const isTransfer = isTransferPayment(props);
+  const isCar = isCarPayment(props);
 
-    const clientSecret = new URLSearchParams(window.location.search).get(
-      'payment_intent_client_secret'
-    );
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
 
-    if (!clientSecret) return;
-
-    stripe.retrievePaymentIntent(clientSecret).then(({ paymentIntent }) => {
-      switch (paymentIntent?.status) {
-        case 'succeeded':
-          setMessage('Payment succeeded!');
-          onSuccess();
-          break;
-        case 'processing':
-          setMessage('Your payment is processing.');
-          break;
-        case 'requires_payment_method':
-          setMessage('Your payment was not successful, please try again.');
-          break;
-        default:
-          setMessage('Something went wrong.');
-          break;
-      }
-    });
-  }, [stripe, onSuccess]);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!stripe || !elements) {
+    if (!stripe || !elements || isProcessing || disabled) {
       return;
     }
 
-    setIsLoading(true);
-    setMessage(null);
+    setIsProcessing(true);
+    setError(null);
 
-    const { error, paymentIntent } = await stripe.confirmPayment({
-      elements,
-      confirmParams: {
-        return_url: `${window.location.origin}/booking/success?booking=${bookingReference}`,
-      },
-      redirect: 'if_required',
-    });
+    try {
+      let clientSecret: string;
+      
+      if (isTransfer) {
+        // Create payment intent for transfer booking
+        const response = await fetch('/api/payments/create-intent', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(props.paymentData),
+        });
 
-    if (error) {
-      if (error.type === 'card_error' || error.type === 'validation_error') {
-        setMessage(error.message || 'An error occurred');
-        onError(error.message || 'Payment failed');
+        if (!response.ok) {
+          throw new Error('Failed to create payment intent');
+        }
+
+        const data = await response.json();
+        clientSecret = data.clientSecret;
+      } else if (isCar) {
+        // Use existing client secret for car booking
+        clientSecret = props.clientSecret;
       } else {
-        setMessage('An unexpected error occurred');
-        onError('An unexpected error occurred');
+        throw new Error('Invalid payment configuration');
       }
-    } else if (paymentIntent && paymentIntent.status === 'succeeded') {
-      setMessage('Payment succeeded!');
-      onSuccess();
+
+      // Confirm payment with Stripe
+      const result = await stripe.confirmCardPayment(clientSecret, {
+        payment_method: {
+          card: elements.getElement(CardElement)!,
+        },
+      });
+
+      if (result.error) {
+        setError(result.error.message || 'Payment failed');
+        onError(result.error.message || 'Payment failed');
+      } else {
+        // Payment succeeded - handle based on payment type
+        if (isTransfer) {
+          (onSuccess as TransferPaymentProps['onSuccess'])(result.paymentIntent as PaymentIntent);
+        } else if (isCar) {
+          await (onSuccess as CarPaymentProps['onSuccess'])();
+        }
+      }
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Payment failed';
+      setError(errorMessage);
+      onError(errorMessage);
+    } finally {
+      setIsProcessing(false);
     }
-
-    setIsLoading(false);
   };
 
-  const paymentElementOptions = {
-    layout: 'tabs' as const,
-  };
-
-  return (
-    <div className="max-w-md mx-auto">
-      <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-        {/* Payment Header */}
-        <div className="flex items-center justify-center mb-6">
-          <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mr-4">
-            <CreditCard className="w-6 h-6 text-green-600" />
-          </div>
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900">Secure Payment</h3>
-            <p className="text-sm text-gray-600">{formatPrice(amount, currency)}</p>
-          </div>
-        </div>
-
-        {/* Security Badge */}
-        <div className="flex items-center justify-center mb-4 p-3 bg-gray-50 rounded-lg">
-          <Lock className="w-4 h-4 text-gray-500 mr-2" />
-          <span className="text-sm text-gray-600">
-            Your payment is secured by Stripe
-          </span>
-        </div>
-
-        <form onSubmit={handleSubmit}>
-          <div className="mb-6">
-            <PaymentElement 
-              options={paymentElementOptions}
-            />
-          </div>
-
-          {message && (
-            <div className={`flex items-center p-3 rounded-lg mb-4 ${
-              message.includes('succeeded') 
-                ? 'bg-green-50 text-green-700' 
-                : 'bg-red-50 text-red-700'
-            }`}>
-              {message.includes('succeeded') ? (
-                <CheckCircle className="w-4 h-4 mr-2 flex-shrink-0" />
-              ) : (
-                <AlertCircle className="w-4 h-4 mr-2 flex-shrink-0" />
-              )}
-              <span className="text-sm">{message}</span>
-            </div>
-          )}
-
-          <Button
-            type="submit"
-            disabled={!stripe || !elements || isLoading}
-            className="w-full h-12 bg-green-600 hover:bg-green-700 text-white font-semibold"
-          >
-            {isLoading ? (
-              <div className="flex items-center justify-center">
-                <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                Processing Payment...
-              </div>
-            ) : (
-              <div className="flex items-center justify-center">
-                <Lock className="w-4 h-4 mr-2" />
-                Pay {formatPrice(amount, currency)}
-              </div>
-            )}
-          </Button>
-        </form>
-
-        {/* Payment Security Info */}
-        <div className="mt-4 text-center">
-          <p className="text-xs text-gray-500">
-            Powered by Stripe • SSL Encrypted • PCI Compliant
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-export default function PaymentForm({ 
-  clientSecret, 
-  amount, 
-  currency = 'MAD', 
-  bookingReference, 
-  onSuccess, 
-  onError 
-}: PaymentFormProps) {
-  const options = {
-    clientSecret,
-    appearance: {
-      theme: 'stripe' as const,
-      variables: {
-        colorPrimary: '#16a34a',
-        colorBackground: '#ffffff',
-        colorText: '#1f2937',
-        colorDanger: '#dc2626',
-        fontFamily: 'Inter, system-ui, sans-serif',
-        spacingUnit: '4px',
-        borderRadius: '8px',
+  const cardElementOptions = {
+    style: {
+      base: {
+        fontSize: '14px',
+        color: '#1f2937',
+        fontFamily: 'system-ui, -apple-system, sans-serif',
+        '::placeholder': {
+          color: '#9ca3af',
+        },
+        iconColor: '#6b7280',
+      },
+      invalid: {
+        color: '#ef4444',
+        iconColor: '#ef4444',
       },
     },
+    hidePostalCode: false,
   };
 
   return (
-    <Elements options={options} stripe={stripePromise}>
-      <CheckoutForm
-        amount={amount}
-        currency={currency}
-        bookingReference={bookingReference}
-        onSuccess={onSuccess}
-        onError={onError}
-      />
+    <form onSubmit={handleSubmit} className="space-y-4">
+      {/* Payment Header */}
+      <div className="flex items-center gap-2 pb-2 border-b border-gray-200">
+        <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+          <Lock className="w-4 h-4 text-green-600" />
+        </div>
+        <div>
+          <h3 className="text-sm font-semibold text-gray-800">Secure Payment</h3>
+          <p className="text-xs text-gray-600">Your payment information is encrypted and secure</p>
+        </div>
+      </div>
+
+      {/* Payment Amount */}
+      <div className="bg-gray-50 rounded-lg p-3 text-center">
+        <p className="text-xs text-gray-600 mb-1">Total Amount</p>
+        <p className="text-lg font-bold text-gray-800">
+          {isTransfer && `${props.paymentData.amount.toFixed(2)} ${props.paymentData.currency.toUpperCase()}`}
+          {isCar && `${props.amount.toFixed(2)} ${props.currency.toUpperCase()}`}
+        </p>
+        <p className="text-xs text-gray-500 mt-1">
+          {isTransfer && props.paymentData.description}
+          {isCar && `Booking Reference: ${props.bookingReference}`}
+        </p>
+      </div>
+
+      {/* Card Element */}
+      <div className="space-y-2">
+        <label className="text-xs font-semibold text-gray-700 flex items-center gap-1">
+          <CreditCard className="w-3 h-3" />
+          Card Information
+        </label>
+        <div className={cn(
+          "p-3 border border-gray-300 rounded-lg bg-white transition-all duration-200",
+          error ? "border-red-500 ring-1 ring-red-500" : "focus-within:border-red-500 focus-within:ring-1 focus-within:ring-red-500"
+        )}>
+          <CardElement
+            options={cardElementOptions}
+            onChange={(event) => {
+              setCardComplete(event.complete);
+              if (event.error) {
+                setError(event.error.message);
+              } else {
+                setError(null);
+              }
+            }}
+          />
+        </div>
+        {error && (
+          <div className="flex items-center gap-1 text-xs text-red-600">
+            <X className="w-3 h-3" />
+            {error}
+          </div>
+        )}
+      </div>
+
+      {/* Security Notice */}
+      <div className="flex items-center gap-2 text-xs text-gray-600 bg-blue-50 p-2 rounded-lg">
+        <Lock className="w-3 h-3 text-blue-600" />
+        <span>Secured by Stripe • 256-bit SSL encryption</span>
+      </div>
+
+      {/* Submit Button */}
+      <Button
+        type="submit"
+        disabled={!stripe || !cardComplete || isProcessing || disabled}
+        className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-lg transition-all duration-200 flex items-center justify-center gap-2"
+      >
+        {isProcessing ? (
+          <>
+            <Loader2 className="w-4 h-4 animate-spin" />
+            Processing Payment...
+          </>
+        ) : (
+          <>
+            <Lock className="w-4 h-4" />
+            {isTransfer && `Pay ${props.paymentData.amount.toFixed(2)} ${props.paymentData.currency.toUpperCase()}`}
+            {isCar && `Pay ${props.amount.toFixed(2)} ${props.currency.toUpperCase()}`}
+          </>
+        )}
+      </Button>
+
+      {/* Trust Indicators */}
+      <div className="flex items-center justify-center gap-3 text-xs text-gray-500 pt-2">
+        <div className="flex items-center gap-1">
+          <Check className="w-3 h-3 text-green-500" />
+          <span>Instant confirmation</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <Check className="w-3 h-3 text-green-500" />
+          <span>Secure payments</span>
+        </div>
+      </div>
+    </form>
+  );
+};
+
+const PaymentForm: React.FC<PaymentFormProps> = (props) => {
+  return (
+    <Elements stripe={stripePromise}>
+      <CheckoutForm {...props} />
     </Elements>
   );
-}
+};
+
+export default PaymentForm;

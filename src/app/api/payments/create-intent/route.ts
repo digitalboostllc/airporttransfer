@@ -1,81 +1,39 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyToken } from '@/lib/auth';
-import { createPaymentIntent, createStripeCustomer, getStripeCustomer } from '@/lib/stripe';
-import { prisma } from '@/lib/prisma';
+import { stripe } from '@/lib/stripe';
 
 export async function POST(request: NextRequest) {
   try {
-    const token = request.headers.get('Authorization')?.split(' ')[1];
-    if (!token) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const body = await request.json();
+    const { amount, currency = 'mad', description, metadata = {} } = body;
+
+    // Validate required fields
+    if (!amount || amount <= 0) {
+      return NextResponse.json(
+        { error: 'Amount is required and must be greater than 0' },
+        { status: 400 }
+      );
     }
 
-    const decoded = await verifyToken(token);
-    if (!decoded) {
-      return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
-    }
-
-    const { bookingId, amount } = await request.json();
-
-    if (!bookingId || !amount) {
-      return NextResponse.json({ error: 'Booking ID and amount are required' }, { status: 400 });
-    }
-
-    // Get booking details
-    const booking = await prisma.booking.findUnique({
-      where: { id: bookingId },
-      include: {
-        customer: true,
-        car: {
-          include: {
-            agency: true
-          }
-        }
-      }
-    });
-
-    if (!booking) {
-      return NextResponse.json({ error: 'Booking not found' }, { status: 404 });
-    }
-
-    // Verify the user owns this booking
-    if (booking.customerId !== decoded.userId) {
-      return NextResponse.json({ error: 'Unauthorized to access this booking' }, { status: 403 });
-    }
-
-    // Get or create Stripe customer
-    let stripeCustomer = await getStripeCustomer(booking.customerEmail);
-    if (!stripeCustomer) {
-      stripeCustomer = await createStripeCustomer(
-        booking.customerEmail,
-        booking.customerName,
-        {
-          userId: decoded.userId,
-          bookingId: booking.id,
-        }
+    if (!stripe) {
+      return NextResponse.json(
+        { error: 'Stripe not configured' },
+        { status: 500 }
       );
     }
 
     // Create payment intent
-    const paymentIntent = await createPaymentIntent(
-      amount,
-      'mad', // Moroccan Dirham
-      {
-        bookingId: booking.id,
-        customerId: decoded.userId,
-        carId: booking.carId || '',
-        agencyId: booking.car?.agency?.id || '',
-        bookingReference: booking.bookingReference,
-      }
-    );
-
-    // Update booking with payment intent ID
-    await prisma.booking.update({
-      where: { id: bookingId },
-      data: {
-        stripePaymentIntentId: paymentIntent.id,
-        paymentStatus: 'pending'
-      }
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: Math.round(amount * 100), // Convert to cents
+      currency: currency.toLowerCase(),
+      automatic_payment_methods: {
+        enabled: true,
+      },
+      description,
+      metadata: {
+        ...metadata,
+        created_at: new Date().toISOString(),
+        source: 'venboo_booking'
+      },
     });
 
     return NextResponse.json({
@@ -84,9 +42,12 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Create payment intent error:', error);
+    console.error('Payment intent creation error:', error);
+    
     return NextResponse.json(
-      { error: 'Failed to create payment intent' },
+      { 
+        error: error instanceof Error ? error.message : 'Failed to create payment intent' 
+      },
       { status: 500 }
     );
   }
