@@ -181,6 +181,24 @@ export default function Home() {
     setIsFormValid(isValid);
   }, [formData]);
 
+  // Reset passenger count when vehicle changes to ensure valid selection
+  useEffect(() => {
+    if (formData.vehicle) {
+      const maxPassengers = {
+        sedan: 4,
+        suv: 7,
+        van: 8
+      };
+      const limit = maxPassengers[formData.vehicle as keyof typeof maxPassengers] || 8;
+      const currentPassengers = parseInt(formData.passengers);
+      
+      // If current passenger count exceeds vehicle limit, reset to limit
+      if (currentPassengers > limit) {
+        setFormData(prev => ({ ...prev, passengers: limit.toString() }));
+      }
+    }
+  }, [formData.vehicle, formData.passengers]);
+
   const [isTimePickerOpen, setIsTimePickerOpen] = useState(false);
 
   // Calculate dynamic pricing based on distance
@@ -847,11 +865,21 @@ export default function Home() {
                           <SelectValue placeholder="Guests" />
                         </SelectTrigger>
                         <SelectContent>
-                          {[1,2,3,4,5,6,7,8].map(num => (
-                            <SelectItem key={num} value={num.toString()}>
-                              {num} guest{num > 1 ? 's' : ''}
-                            </SelectItem>
-                          ))}
+                          {(() => {
+                            const maxPassengers = {
+                              sedan: 4,
+                              suv: 7,
+                              van: 8
+                            };
+                            const limit = formData.vehicle ? maxPassengers[formData.vehicle as keyof typeof maxPassengers] || 8 : 8;
+                            const passengerOptions = Array.from({length: limit}, (_, i) => i + 1);
+                            
+                            return passengerOptions.map(num => (
+                              <SelectItem key={num} value={num.toString()}>
+                                {num} guest{num > 1 ? 's' : ''}
+                              </SelectItem>
+                            ));
+                          })()}
                         </SelectContent>
                       </Select>
                     </div>
@@ -1187,14 +1215,17 @@ export default function Home() {
                             <X className="h-4 w-4" />
                           </Button>
                         </div>
-                        <div className="flex-1 overflow-y-auto p-4">
+                        <div className="flex-1 overflow-y-auto p-4" onClick={(e) => e.stopPropagation()}>
                           <div className="space-y-3">
                             <div className="text-center mb-4">
                               <div className="flex justify-center gap-2 mb-3">
                                 <Button
                                   variant={pickupIsAirport ? "default" : "outline"}
                                   size="sm"
-                                  onClick={() => setPickupIsAirport(true)}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setPickupIsAirport(true);
+                                  }}
                                   className="flex items-center gap-2"
                                 >
                                   <Plane className="w-4 h-4" />
@@ -1203,7 +1234,10 @@ export default function Home() {
                                 <Button
                                   variant={!pickupIsAirport ? "default" : "outline"}
                                   size="sm"
-                                  onClick={() => setPickupIsAirport(false)}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setPickupIsAirport(false);
+                                  }}
                                   className="flex items-center gap-2"
                                 >
                                   <MapPin className="w-4 h-4" />
@@ -1234,7 +1268,7 @@ export default function Home() {
                                 ))}
                               </div>
                             ) : (
-                              <div className="space-y-3">
+                              <div className="space-y-3" onClick={(e) => e.stopPropagation()}>
                                 <AddressInput
                                   value={formData.pickup}
                                   onChange={(address) => {
@@ -1323,7 +1357,7 @@ export default function Home() {
                                 ))}
                               </div>
                             ) : (
-                              <div className="space-y-3">
+                              <div className="space-y-3" onClick={(e) => e.stopPropagation()}>
                                 <AddressInput
                                   value={formData.destination}
                                   onChange={(address) => {
@@ -1480,21 +1514,40 @@ export default function Home() {
                             <div>
                               <h3 className="text-sm font-semibold text-gray-800 mb-3">Number of Passengers</h3>
                               <div className="grid grid-cols-4 gap-2">
-                                {[1,2,3,4,5,6,7,8].map(num => (
-                                  <Button
-                                    key={num}
-                                    variant={formData.passengers === num.toString() ? "default" : "outline"}
-                                    size="sm"
-                                    onClick={() => handleSelectChange('passengers', num.toString())}
-                                    className="aspect-square"
-                                  >
-                                    {num}
-                                  </Button>
-                                ))}
+                                {(() => {
+                                  const maxPassengers = {
+                                    sedan: 4,
+                                    suv: 7,
+                                    van: 8
+                                  };
+                                  const limit = formData.vehicle ? maxPassengers[formData.vehicle as keyof typeof maxPassengers] || 8 : 8;
+                                  const passengerOptions = Array.from({length: limit}, (_, i) => i + 1);
+                                  
+                                  return passengerOptions.map(num => (
+                                    <Button
+                                      key={num}
+                                      variant={formData.passengers === num.toString() ? "default" : "outline"}
+                                      size="sm"
+                                      onClick={() => handleSelectChange('passengers', num.toString())}
+                                      className="aspect-square"
+                                    >
+                                      {num}
+                                    </Button>
+                                  ));
+                                })()}
                               </div>
-                              <p className="text-xs text-gray-500 mt-2">
-                                {formData.passengers} passenger{formData.passengers !== '1' ? 's' : ''} selected
-                              </p>
+                              <div className="text-xs text-gray-500 mt-2 space-y-1">
+                                <p>
+                                  {formData.passengers} passenger{formData.passengers !== '1' ? 's' : ''} selected
+                                </p>
+                                {formData.vehicle && (
+                                  <p className="text-blue-600">
+                                    {formData.vehicle === 'sedan' && 'Sedan: Perfect for up to 4 passengers'}
+                                    {formData.vehicle === 'suv' && 'SUV: Comfortable for up to 7 passengers'}
+                                    {formData.vehicle === 'van' && 'Van: Spacious for up to 8 passengers'}
+                                  </p>
+                                )}
+                              </div>
                             </div>
                           </div>
                         </div>
