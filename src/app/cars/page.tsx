@@ -545,7 +545,7 @@ function CarListingContent() {
           </div>
 
           {/* Search Form - Part of Hero (Non-Sticky) */}
-          <div id="hero-search-form" className="bg-white/95 backdrop-blur-xl border border-white/20 rounded-2xl shadow-lg p-3 md:p-4 mb-4">
+          <div id="hero-search-form" className="bg-white/95 backdrop-blur-xl border border-white/20 rounded-2xl shadow-lg p-2 sm:p-3 md:p-4 mb-4">
             <div className="flex flex-col gap-2 lg:flex-row lg:gap-2 lg:items-center">
             
             {/* Pickup Location */}
@@ -556,18 +556,18 @@ function CarListingContent() {
                     variant="outline"
                     role="combobox"
                     aria-expanded={isLocationOpen}
-                    className="w-full justify-between text-left h-10 bg-white hover:bg-gray-50 border-gray-300"
+                    className="w-full justify-between text-left h-9 sm:h-10 bg-white hover:bg-gray-50 border-gray-300"
                   >
                     <div className="flex flex-col items-start min-w-0">
                       <span className="text-xs text-gray-500 font-medium">Pick-up</span>
-                      <span className="font-medium text-gray-900 truncate">{searchFormData.location}</span>
+                      <span className="font-medium text-gray-900 truncate text-sm">{searchFormData.location}</span>
                     </div>
                     <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-80 p-0">
+                <PopoverContent className="w-[95vw] max-w-[320px] p-0">
                   <Command>
-                    <CommandInput placeholder="Search locations..." />
+                    <CommandInput placeholder="Search locations..." className="text-sm" />
                     <CommandEmpty>No location found.</CommandEmpty>
                     <CommandList>
                       <CommandGroup>
@@ -579,6 +579,7 @@ function CarListingContent() {
                               handleSearchFormChange('location', location);
                               setIsLocationOpen(false);
                             }}
+                            className="text-sm"
                           >
                             <MapPin className="w-4 h-4 mr-2 text-gray-400" />
                             {location}
@@ -595,12 +596,12 @@ function CarListingContent() {
             <div className="w-full lg:flex-1 lg:min-w-0">
               <Button
                 variant="outline"
-                className="w-full justify-start text-left h-10 bg-white hover:bg-gray-50 border-gray-300"
+                className="w-full justify-start text-left h-9 sm:h-10 bg-white hover:bg-gray-50 border-gray-300"
                 disabled
               >
                 <div className="flex flex-col items-start">
                   <span className="text-xs text-gray-500 font-medium">Drop-off</span>
-                  <span className="font-medium text-gray-600">Same place</span>
+                  <span className="font-medium text-gray-600 text-sm">Same place</span>
                 </div>
               </Button>
             </div>
@@ -611,11 +612,11 @@ function CarListingContent() {
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
-                    className="w-full justify-start text-left h-10 bg-white hover:bg-gray-50 border-gray-300"
+                    className="w-full justify-start text-left h-9 sm:h-10 bg-white hover:bg-gray-50 border-gray-300"
                   >
                     <div className="flex flex-col items-start min-w-0">
                       <span className="text-xs text-gray-500 font-medium">Rental dates</span>
-                      <div className="font-medium text-gray-900 truncate">
+                      <div className="font-medium text-gray-900 truncate text-sm">
                         {searchFormData.pickupDate && searchFormData.returnDate ? (
                           `${format(searchFormData.pickupDate, "MMM dd")} — ${format(searchFormData.returnDate, "MMM dd, yyyy")}`
                         ) : (
@@ -626,11 +627,9 @@ function CarListingContent() {
                     <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-[95vw] max-w-[400px] p-0" align="start">
-                  <div className="p-2">
-                    {/* Compact Mobile Layout */}
-                    <div className="space-y-2">
-                      {/* Pickup Date */}
+                <PopoverContent className="w-[95vw] max-w-[600px] p-0" align="start">
+                  <div className="p-2 sm:p-3">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 sm:gap-3 mb-2 sm:mb-3">
                       <div>
                         <label className="block text-xs font-medium text-gray-700 mb-1">Pickup Date</label>
                         <Calendar
@@ -638,10 +637,9 @@ function CarListingContent() {
                           selected={searchFormData.pickupDate}
                           onSelect={(date) => handleSearchFormChange('pickupDate', date)}
                           disabled={(date) => date < new Date()}
-                          className="rounded-md border text-xs scale-90 origin-top-left"
+                          className="rounded-md border text-xs sm:text-sm scale-90 sm:scale-100 origin-top-left"
                         />
                       </div>
-                      {/* Return Date */}
                       <div>
                         <label className="block text-xs font-medium text-gray-700 mb-1">Return Date</label>
                         <Calendar
@@ -651,23 +649,22 @@ function CarListingContent() {
                           disabled={(date) => 
                             date < new Date() || (searchFormData.pickupDate ? date < searchFormData.pickupDate : false)
                           }
-                          className="rounded-md border text-xs scale-90 origin-top-left"
+                          className="rounded-md border text-xs sm:text-sm scale-90 sm:scale-100 origin-top-left"
                         />
                       </div>
                     </div>
-                    {/* Compact Time Selectors */}
-                    <div className="grid grid-cols-2 gap-2 pt-2 border-t">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 pt-2 sm:pt-3 border-t">
                       <div>
-                        <label className="block text-xs font-medium text-gray-700 mb-1">Pickup</label>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">Pickup time</label>
                         <Select value={searchFormData.pickupTime} onValueChange={(value) => handleSearchFormChange('pickupTime', value)}>
-                          <SelectTrigger className="h-7 text-xs">
+                          <SelectTrigger className="h-8 sm:h-9 text-xs sm:text-sm">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
                             {Array.from({ length: 24 }, (_, i) => {
                               const time = `${String(i).padStart(2, '0')}:00`;
                               return (
-                                <SelectItem key={time} value={time}>
+                                <SelectItem key={time} value={time} className="text-xs sm:text-sm">
                                   {time}
                                 </SelectItem>
                               );
@@ -676,16 +673,16 @@ function CarListingContent() {
                         </Select>
                       </div>
                       <div>
-                        <label className="block text-xs font-medium text-gray-700 mb-1">Drop-off</label>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">Drop-off time</label>
                         <Select value={searchFormData.returnTime} onValueChange={(value) => handleSearchFormChange('returnTime', value)}>
-                          <SelectTrigger className="h-7 text-xs">
+                          <SelectTrigger className="h-8 sm:h-9 text-xs sm:text-sm">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
                             {Array.from({ length: 24 }, (_, i) => {
                               const time = `${String(i).padStart(2, '0')}:00`;
                               return (
-                                <SelectItem key={time} value={time}>
+                                <SelectItem key={time} value={time} className="text-xs sm:text-sm">
                                   {time}
                                 </SelectItem>
                               );
@@ -694,7 +691,7 @@ function CarListingContent() {
                         </Select>
                       </div>
                     </div>
-                    <div className="flex justify-between items-center pt-2 border-t">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 pt-2 sm:pt-3 border-t">
                       <div className="text-xs text-gray-600">
                         Total: {searchFormData.pickupDate && searchFormData.returnDate ? 
                           Math.max(1, Math.ceil((searchFormData.returnDate.getTime() - searchFormData.pickupDate.getTime()) / (1000 * 60 * 60 * 24))) : 0
@@ -703,10 +700,10 @@ function CarListingContent() {
                       <Button 
                         onClick={() => setIsPickupDateOpen(false)}
                         size="sm"
-                        className="bg-green-600 hover:bg-green-700 text-xs h-7"
+                        className="bg-green-600 hover:bg-green-700 text-xs w-full sm:w-auto"
                       >
                         <CarIcon className="w-3 h-3 mr-1" />
-                        Done
+                        Search Cars
                       </Button>
                     </div>
                   </div>
@@ -720,7 +717,7 @@ function CarListingContent() {
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
-                    className="w-full lg:w-auto h-10 px-3 bg-white hover:bg-gray-50 border-gray-300"
+                    className="w-full lg:w-auto h-9 sm:h-10 px-3 bg-white hover:bg-gray-50 border-gray-300 text-sm"
                   >
                     <SlidersHorizontal className="w-4 h-4 mr-2" />
                     Filters
@@ -745,10 +742,10 @@ function CarListingContent() {
                     <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-[95vw] max-w-[380px] p-0" align="end">
-                  <div className="p-2 space-y-2">
+                <PopoverContent className="w-[95vw] max-w-[500px] p-0" align="end">
+                  <div className="p-3 sm:p-4 space-y-2 sm:space-y-3">
                     <div className="flex items-center justify-between">
-                      <h3 className="font-semibold text-gray-900 text-xs">Filters</h3>
+                      <h3 className="font-semibold text-gray-900 text-sm">Filters</h3>
                       <Button
                         variant="ghost"
                         size="sm"
@@ -763,109 +760,115 @@ function CarListingContent() {
                           });
                           handleSearchFormChange('carCategory', 'all');
                         }}
-                        className="text-xs text-gray-500 hover:text-gray-700 h-5 px-1"
+                        className="text-xs text-gray-500 hover:text-gray-700 h-6 px-2"
                       >
-                        Clear
+                        Clear all
                       </Button>
                     </div>
 
-                    {/* Compact Filter Layout */}
-                    <div className="space-y-2">
-                      {/* Price Range */}
-                      <div>
-                        <label className="block text-xs font-medium text-gray-700 mb-1">Price (MAD/day)</label>
-                        <div className="flex items-center space-x-1">
-                          <Input
-                            type="number"
-                            placeholder="Min"
-                            value={filters.priceRange[0]}
-                            onChange={(e) => handleFilterChange('priceRange', [parseInt(e.target.value) || 0, filters.priceRange[1]])}
-                            className="w-14 text-xs h-6"
-                          />
-                          <span className="text-gray-400 text-xs">-</span>
-                          <Input
-                            type="number"
-                            placeholder="Max"
-                            value={filters.priceRange[1]}
-                            onChange={(e) => handleFilterChange('priceRange', [filters.priceRange[0], parseInt(e.target.value) || 1000])}
-                            className="w-14 text-xs h-6"
-                          />
+                    {/* Responsive Column Layout */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 md:gap-4">
+                      {/* Left Column */}
+                      <div className="space-y-2 sm:space-y-3">
+                        {/* Price Range */}
+                        <div className="space-y-1">
+                          <label className="block text-xs font-medium text-gray-700">Price per day (MAD)</label>
+                          <div className="flex items-center space-x-2">
+                            <Input
+                              type="number"
+                              placeholder="Min"
+                              value={filters.priceRange[0]}
+                              onChange={(e) => handleFilterChange('priceRange', [parseInt(e.target.value) || 0, filters.priceRange[1]])}
+                              className="flex-1 text-xs h-8 sm:h-9"
+                            />
+                            <span className="text-gray-400 text-xs">-</span>
+                            <Input
+                              type="number"
+                              placeholder="Max"
+                              value={filters.priceRange[1]}
+                              onChange={(e) => handleFilterChange('priceRange', [filters.priceRange[0], parseInt(e.target.value) || 1000])}
+                              className="flex-1 text-xs h-8 sm:h-9"
+                            />
+                          </div>
                         </div>
-                      </div>
 
-                      {/* Horizontal Row 1 */}
-                      <div className="grid grid-cols-2 gap-2">
-                        <div>
-                          <label className="block text-xs font-medium text-gray-700 mb-1">Transmission</label>
+                        {/* Transmission */}
+                        <div className="space-y-1">
+                          <label className="block text-xs font-medium text-gray-700">Transmission</label>
                           <Select value={filters.transmission} onValueChange={(value) => handleFilterChange('transmission', value)}>
-                            <SelectTrigger className="h-6 text-xs">
+                            <SelectTrigger className="w-full h-8 sm:h-9 text-xs">
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="all">All</SelectItem>
-                              <SelectItem value="manual">Manual</SelectItem>
-                              <SelectItem value="automatic">Auto</SelectItem>
+                              <SelectItem value="all" className="text-xs">All</SelectItem>
+                              <SelectItem value="manual" className="text-xs">Manual</SelectItem>
+                              <SelectItem value="automatic" className="text-xs">Automatic</SelectItem>
                             </SelectContent>
                           </Select>
                         </div>
-                        <div>
-                          <label className="block text-xs font-medium text-gray-700 mb-1">Fuel</label>
+
+                        {/* Fuel Type */}
+                        <div className="space-y-1">
+                          <label className="block text-xs font-medium text-gray-700">Fuel Type</label>
                           <Select value={filters.fuelType} onValueChange={(value) => handleFilterChange('fuelType', value)}>
-                            <SelectTrigger className="h-6 text-xs">
+                            <SelectTrigger className="w-full h-8 sm:h-9 text-xs">
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="all">All</SelectItem>
-                              <SelectItem value="petrol">Petrol</SelectItem>
-                              <SelectItem value="diesel">Diesel</SelectItem>
-                              <SelectItem value="hybrid">Hybrid</SelectItem>
+                              <SelectItem value="all" className="text-xs">All</SelectItem>
+                              <SelectItem value="petrol" className="text-xs">Petrol</SelectItem>
+                              <SelectItem value="diesel" className="text-xs">Diesel</SelectItem>
+                              <SelectItem value="hybrid" className="text-xs">Hybrid</SelectItem>
                             </SelectContent>
                           </Select>
                         </div>
                       </div>
 
-                      {/* Horizontal Row 2 */}
-                      <div className="grid grid-cols-2 gap-2">
-                        <div>
-                          <label className="block text-xs font-medium text-gray-700 mb-1">Seats</label>
+                      {/* Right Column */}
+                      <div className="space-y-2 sm:space-y-3">
+                        {/* Number of Seats */}
+                        <div className="space-y-1">
+                          <label className="block text-xs font-medium text-gray-700">Number of Seats</label>
                           <Select value={filters.seats} onValueChange={(value) => handleFilterChange('seats', value)}>
-                            <SelectTrigger className="h-6 text-xs">
+                            <SelectTrigger className="w-full h-8 sm:h-9 text-xs">
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="all">Any</SelectItem>
-                              <SelectItem value="2">2 seats</SelectItem>
-                              <SelectItem value="4">4 seats</SelectItem>
-                              <SelectItem value="5">5 seats</SelectItem>
-                              <SelectItem value="7">7+ seats</SelectItem>
+                              <SelectItem value="all" className="text-xs">All</SelectItem>
+                              <SelectItem value="2" className="text-xs">2 seats</SelectItem>
+                              <SelectItem value="4" className="text-xs">4 seats</SelectItem>
+                              <SelectItem value="5" className="text-xs">5 seats</SelectItem>
+                              <SelectItem value="7" className="text-xs">7+ seats</SelectItem>
                             </SelectContent>
                           </Select>
                         </div>
-                        <div>
-                          <label className="block text-xs font-medium text-gray-700 mb-1">Agency</label>
+
+                        {/* Agency */}
+                        <div className="space-y-1">
+                          <label className="block text-xs font-medium text-gray-700">Rental Agency</label>
                           <Select value={filters.agency} onValueChange={(value) => handleFilterChange('agency', value)}>
-                            <SelectTrigger className="h-6 text-xs">
+                            <SelectTrigger className="w-full h-8 sm:h-9 text-xs">
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="all">All</SelectItem>
+                              <SelectItem value="all" className="text-xs">All agencies</SelectItem>
                               {uniqueAgencies.map((agency) => (
-                                <SelectItem key={agency} value={agency}>{agency}</SelectItem>
+                                <SelectItem key={agency} value={agency} className="text-xs">{agency}</SelectItem>
                               ))}
                             </SelectContent>
                           </Select>
                         </div>
-                      </div>
 
-                      {/* Apply Button */}
-                      <div className="pt-1">
-                        <Button 
-                          onClick={() => setIsFiltersOpen(false)}
-                          size="sm"
-                          className="w-full bg-green-600 hover:bg-green-700 text-xs h-6"
-                        >
-                          Apply Filters
-                        </Button>
+                        {/* Apply Filters Button */}
+                        <div className="pt-2 sm:pt-3">
+                          <Button 
+                            onClick={() => setIsFiltersOpen(false)}
+                            size="sm"
+                            className="w-full bg-green-600 hover:bg-green-700 text-xs h-8 sm:h-9"
+                          >
+                            Apply Filters
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   </div>
