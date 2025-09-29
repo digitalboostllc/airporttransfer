@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import {
   CheckCircle,
   Plane,
@@ -28,7 +29,8 @@ import {
   ArrowRight,
   Shield,
   CreditCard,
-  CheckCircle2
+  CheckCircle2,
+  ChevronDown
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -80,6 +82,18 @@ export default function Home() {
   const [paymentIntentId, setPaymentIntentId] = useState<string | null>(null);
   const [bookingError, setBookingError] = useState<string | null>(null);
   const [isFormValid, setIsFormValid] = useState(false);
+
+  // Modal states for mobile UX
+  const [isPickupLocationOpen, setIsPickupLocationOpen] = useState(false);
+  const [isDestinationLocationOpen, setIsDestinationLocationOpen] = useState(false);
+  const [isDateTimeOpen, setIsDateTimeOpen] = useState(false);
+  const [isVehiclePassengerOpen, setIsVehiclePassengerOpen] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+
+  // Client-side check for portal
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   // Car rental specific state
   const [rentalFormData, setRentalFormData] = useState({
@@ -596,8 +610,66 @@ export default function Home() {
                     <MapPin className="w-3.5 h-3.5 text-red-500" />
                     <h3 className="text-xs font-semibold text-gray-800">Where & When</h3>
                   </div>
-                  {/* Integrated Layout: Inputs with Swap Button Between */}
-                  <div className="space-y-2">
+                  {/* Mobile Modal Buttons */}
+                  <div className="space-y-2 md:hidden">
+                    {/* Pickup Location Button */}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setIsPickupLocationOpen(true)}
+                      className="w-full h-12 justify-start text-left font-normal border-gray-300 hover:border-red-300 bg-white"
+                    >
+                      <div className="flex items-center gap-3 w-full">
+                        <div className="w-8 h-8 bg-red-50 rounded-full flex items-center justify-center flex-shrink-0">
+                          {pickupIsAirport ? <Plane className="w-4 h-4 text-red-500" /> : <MapPin className="w-4 h-4 text-red-500" />}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs text-gray-500 mb-0.5">Pickup Location</p>
+                          <p className="text-sm text-gray-800 truncate">
+                            {formData.pickup || (pickupIsAirport ? 'Select airport' : 'Enter address')}
+                          </p>
+                        </div>
+                        <ChevronDown className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                      </div>
+                    </Button>
+
+                    {/* Destination Location Button */}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setIsDestinationLocationOpen(true)}
+                      className="w-full h-12 justify-start text-left font-normal border-gray-300 hover:border-red-300 bg-white"
+                    >
+                      <div className="flex items-center gap-3 w-full">
+                        <div className="w-8 h-8 bg-orange-50 rounded-full flex items-center justify-center flex-shrink-0">
+                          {!pickupIsAirport ? <Plane className="w-4 h-4 text-orange-500" /> : <Target className="w-4 h-4 text-orange-500" />}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs text-gray-500 mb-0.5">Destination</p>
+                          <p className="text-sm text-gray-800 truncate">
+                            {formData.destination || (!pickupIsAirport ? 'Select airport' : 'Enter address')}
+                          </p>
+                        </div>
+                        <ChevronDown className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                      </div>
+                    </Button>
+
+                    {/* Swap Button */}
+                    <div className="flex justify-center py-2">
+                      <button
+                        type="button"
+                        onClick={handleSwapLocations}
+                        disabled={!formData.destination}
+                        className="w-10 h-10 bg-white border border-gray-200 hover:border-red-300 rounded-full shadow-sm hover:shadow-md transition-all duration-200 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed group"
+                        title="Swap pickup and destination"
+                      >
+                        <RotateCcw className="w-4 h-4 text-gray-600 group-hover:text-red-500 transition-colors duration-200 group-hover:rotate-180" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Desktop Layout: Inputs with Swap Button Between */}
+                  <div className="space-y-2 hidden md:block">
                     <div className="flex items-stretch gap-1.5">
                       {/* First Input - Dynamic based on pickupIsAirport */}
                       <div className="relative flex-1 min-w-0">
@@ -639,7 +711,7 @@ export default function Home() {
                         >
                           <RotateCcw className="w-3.5 h-3.5 text-gray-600 group-hover:text-red-500 transition-colors duration-200 group-hover:rotate-180" />
                         </button>
-        </div>
+                      </div>
 
                       {/* Second Input - Dynamic based on pickupIsAirport */}
                       <div className="relative flex-1 min-w-0">
@@ -672,7 +744,40 @@ export default function Home() {
                     </div>
                   </div>
                       
-                      <div className="grid grid-cols-3 gap-1.5">
+                  {/* Mobile Date/Time Button */}
+                  <div className="md:hidden">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setIsDateTimeOpen(true)}
+                      className="w-full h-12 justify-start text-left font-normal border-gray-300 hover:border-red-300 bg-white"
+                    >
+                      <div className="flex items-center gap-3 w-full">
+                        <div className="w-8 h-8 bg-blue-50 rounded-full flex items-center justify-center flex-shrink-0">
+                          <CalendarIcon className="w-4 h-4 text-blue-500" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs text-gray-500 mb-0.5">When</p>
+                          <p className="text-sm text-gray-800">
+                            {formData.date && formData.time
+                              ? `${format(formData.date, "MMM dd")} at ${new Date(`2000-01-01 ${formData.time}`).toLocaleString('en-US', {
+                                  hour: 'numeric',
+                                  minute: '2-digit',
+                                  hour12: true
+                                })}`
+                              : formData.date
+                              ? `${format(formData.date, "MMM dd")} - Select time`
+                              : "Select date & time"
+                            }
+                          </p>
+                        </div>
+                        <ChevronDown className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                      </div>
+                    </Button>
+                  </div>
+
+                  {/* Desktop Date/Time Grid */}
+                  <div className="grid grid-cols-3 gap-1.5 hidden md:grid">
                     <Popover>
                       <PopoverTrigger asChild>
                         <Button
@@ -702,11 +807,11 @@ export default function Home() {
                         <Button
                           variant="outline"
                           className={cn(
-                            "w-full h-12 px-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all duration-200 bg-white hover:border-red-300 shadow-sm text-gray-800 justify-start text-left font-normal",
+                            "w-full h-9 px-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-red-500 focus:border-red-500 transition-all duration-200 bg-white hover:border-red-300 shadow-sm text-gray-800 justify-start text-left font-normal text-xs",
                             !formData.time && "text-gray-500"
                           )}
                         >
-                          <Clock className="mr-2 h-4 w-4" />
+                          <Clock className="mr-1.5 h-3.5 w-3.5" />
                           {formData.time ? new Date(`2000-01-01 ${formData.time}`).toLocaleString('en-US', {
                             hour: 'numeric',
                             minute: '2-digit',
@@ -736,9 +841,9 @@ export default function Home() {
                     </Popover>
 
                     <div className="relative">
-                      <Users className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500 z-20 pointer-events-none" />
+                      <Users className="absolute left-3 top-1/2 transform -translate-y-1/2 w-3.5 h-3.5 text-gray-500 z-20 pointer-events-none" />
                       <Select onValueChange={(value) => handleSelectChange('passengers', value)} defaultValue="1">
-                        <SelectTrigger className="w-full pl-10 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all duration-200 bg-white hover:border-red-300 shadow-sm text-gray-800">
+                        <SelectTrigger className="w-full pl-8 h-9 border border-gray-300 rounded-md focus:ring-1 focus:ring-red-500 focus:border-red-500 transition-all duration-200 bg-white hover:border-red-300 shadow-sm text-gray-800 text-xs">
                           <SelectValue placeholder="Guests" />
                         </SelectTrigger>
                         <SelectContent>
@@ -755,48 +860,78 @@ export default function Home() {
 
                 {/* Step 2: Choose Your Ride */}
                 <div className="form-step space-y-2">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Car className="w-4 h-4 text-red-500" />
-                        <h3 className="text-sm font-semibold text-gray-800">Choose Your Ride</h3>
-                        {!routeInfo && formData.pickup && formData.destination && (
-                          <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
-                            Calculating route...
-                          </span>
-                        )}
-                        {!formData.destination && (
-                          <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
-                            Select destination
-                          </span>
-                        )}
+                  <div className="flex items-center gap-2 mb-2">
+                    <Car className="w-4 h-4 text-red-500" />
+                    <h3 className="text-sm font-semibold text-gray-800">Choose Your Ride</h3>
+                    {!routeInfo && formData.pickup && formData.destination && (
+                      <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+                        Calculating route...
+                      </span>
+                    )}
+                    {!formData.destination && (
+                      <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+                        Select destination
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Mobile Vehicle & Passenger Button */}
+                  <div className="md:hidden">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setIsVehiclePassengerOpen(true)}
+                      className="w-full h-12 justify-start text-left font-normal border-gray-300 hover:border-red-300 bg-white"
+                    >
+                      <div className="flex items-center gap-3 w-full">
+                        <div className="w-8 h-8 bg-green-50 rounded-full flex items-center justify-center flex-shrink-0">
+                          <Car className="w-4 h-4 text-green-500" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs text-gray-500 mb-0.5">Vehicle & Passengers</p>
+                          <p className="text-sm text-gray-800">
+                            {formData.vehicle && formData.passengers
+                              ? `${formData.vehicle.charAt(0).toUpperCase() + formData.vehicle.slice(1)} • ${formData.passengers} passenger${formData.passengers !== '1' ? 's' : ''}`
+                              : formData.vehicle
+                              ? `${formData.vehicle.charAt(0).toUpperCase() + formData.vehicle.slice(1)} - Select passengers`
+                              : "Select vehicle & passengers"
+                            }
+                          </p>
+                        </div>
+                        <ChevronDown className="w-4 h-4 text-gray-400 flex-shrink-0" />
                       </div>
-                      <div className="grid grid-cols-3 gap-2">
-                        {[
-                          { id: 'sedan', icon: Car, name: 'Sedan', passengers: '3', color: 'bg-red-50 border-red-200' },
-                          { id: 'suv', icon: Truck, name: 'SUV', passengers: '6', color: 'bg-teal-50 border-teal-200' },
-                          { id: 'van', icon: Bus, name: 'Van', passengers: '8', color: 'bg-orange-50 border-orange-200' }
-                        ].map((vehicle) => (
-                        <div
-                          key={vehicle.id}
-                          className={cn(
-                            "car-3d-card p-2 rounded-lg text-center cursor-pointer",
-                            formData.vehicle === vehicle.id ? "selected" : "",
-                            vehicle.color
+                    </Button>
+                  </div>
+
+                  {/* Desktop Vehicle Grid */}
+                  <div className="grid grid-cols-3 gap-2 hidden md:grid">
+                    {[
+                      { id: 'sedan', icon: Car, name: 'Sedan', passengers: '3', color: 'bg-red-50 border-red-200' },
+                      { id: 'suv', icon: Truck, name: 'SUV', passengers: '6', color: 'bg-teal-50 border-teal-200' },
+                      { id: 'van', icon: Bus, name: 'Van', passengers: '8', color: 'bg-orange-50 border-orange-200' }
+                    ].map((vehicle) => (
+                      <div
+                        key={vehicle.id}
+                        className={cn(
+                          "car-3d-card p-2 rounded-lg text-center cursor-pointer",
+                          formData.vehicle === vehicle.id ? "selected" : "",
+                          vehicle.color
+                        )}
+                        onClick={() => handleSelectChange('vehicle', vehicle.id)}
+                      >
+                        <div className="car-3d-icon w-6 h-6 mx-auto mb-1 flex items-center justify-center">
+                          <vehicle.icon className="w-5 h-5 text-gray-700" />
+                        </div>
+                        <h4 className="font-semibold text-gray-800 text-xs mb-1">{vehicle.name}</h4>
+                        <p className="text-xs text-gray-600 mb-1">{vehicle.passengers} guests</p>
+                        <p className="font-bold text-red-500 text-xs">
+                          {estimatedPrices[vehicle.id as keyof typeof estimatedPrices]} MAD
+                          {routeInfo && (
+                            <span className="block text-xs text-gray-500 font-normal">
+                              ~{routeInfo.distance}
+                            </span>
                           )}
-                          onClick={() => handleSelectChange('vehicle', vehicle.id)}
-                        >
-                          <div className="car-3d-icon w-6 h-6 mx-auto mb-1 flex items-center justify-center">
-                            <vehicle.icon className="w-5 h-5 text-gray-700" />
-                          </div>
-                            <h4 className="font-semibold text-gray-800 text-xs mb-1">{vehicle.name}</h4>
-                            <p className="text-xs text-gray-600 mb-1">{vehicle.passengers} guests</p>
-                            <p className="font-bold text-red-500 text-xs">
-                              {estimatedPrices[vehicle.id as keyof typeof estimatedPrices]} MAD
-                              {routeInfo && (
-                                <span className="block text-xs text-gray-500 font-normal">
-                                  ~{routeInfo.distance}
-                                </span>
-                              )}
-                            </p>
+                        </p>
                       </div>
                     ))}
                   </div>
@@ -1025,6 +1160,358 @@ export default function Home() {
                     </div>
                   )}
                 </div>
+              )}
+
+              {/* Mobile Modal Components */}
+              {activeService === 'transfer' && (
+                <>
+                  {/* Pickup Location Modal */}
+                  {isMounted && isPickupLocationOpen && createPortal(
+                    <div className="fixed inset-0 z-[9999] md:hidden">
+                      <div 
+                        className="absolute inset-0 bg-black/50 backdrop-blur-sm" 
+                        onClick={() => setIsPickupLocationOpen(false)}
+                      />
+                      <div className="absolute inset-x-0 top-20 bottom-0 flex flex-col bg-white rounded-t-2xl shadow-2xl animate-in slide-in-from-bottom duration-300">
+                        <div className="flex justify-center pt-3 pb-1">
+                          <div className="w-8 h-1 bg-gray-300 rounded-full"></div>
+                        </div>
+                        <div className="flex-shrink-0 bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
+                          <h2 className="text-lg font-semibold text-gray-900">Pickup Location</h2>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setIsPickupLocationOpen(false)}
+                            className="h-8 w-8 p-0 rounded-full hover:bg-gray-100"
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                        <div className="flex-1 overflow-y-auto p-4">
+                          <div className="space-y-3">
+                            <div className="text-center mb-4">
+                              <div className="flex justify-center gap-2 mb-3">
+                                <Button
+                                  variant={pickupIsAirport ? "default" : "outline"}
+                                  size="sm"
+                                  onClick={() => setPickupIsAirport(true)}
+                                  className="flex items-center gap-2"
+                                >
+                                  <Plane className="w-4 h-4" />
+                                  Airport
+                                </Button>
+                                <Button
+                                  variant={!pickupIsAirport ? "default" : "outline"}
+                                  size="sm"
+                                  onClick={() => setPickupIsAirport(false)}
+                                  className="flex items-center gap-2"
+                                >
+                                  <MapPin className="w-4 h-4" />
+                                  City
+                                </Button>
+                              </div>
+                            </div>
+                            {pickupIsAirport ? (
+                              <div className="space-y-2">
+                                {airports.map((airport) => (
+                                  <Button
+                                    key={airport}
+                                    variant={formData.pickup === airport ? "default" : "outline"}
+                                    className="w-full justify-start text-left h-auto p-3"
+                                    onClick={() => {
+                                      handleAddressChange('pickup', airport);
+                                      setIsPickupLocationOpen(false);
+                                    }}
+                                  >
+                                    <div className="flex items-center gap-3">
+                                      <Plane className="w-4 h-4 text-gray-500" />
+                                      <div>
+                                        <p className="font-medium text-sm">{airport.split(',')[0]}</p>
+                                        <p className="text-xs text-gray-500">{airport.split(',').slice(1).join(',')}</p>
+                                      </div>
+                                    </div>
+                                  </Button>
+                                ))}
+                              </div>
+                            ) : (
+                              <div className="space-y-3">
+                                <AddressInput
+                                  value={formData.pickup}
+                                  onChange={(address) => {
+                                    handleAddressChange('pickup', address);
+                                    if (address) setIsPickupLocationOpen(false);
+                                  }}
+                                  placeholder="Enter pickup address"
+                                  icon="pickup"
+                                  className="w-full h-12 border-2 border-gray-300 rounded-lg text-base"
+                                />
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>,
+                    document.body
+                  )}
+
+                  {/* Destination Location Modal */}
+                  {isMounted && isDestinationLocationOpen && createPortal(
+                    <div className="fixed inset-0 z-[9999] md:hidden">
+                      <div 
+                        className="absolute inset-0 bg-black/50 backdrop-blur-sm" 
+                        onClick={() => setIsDestinationLocationOpen(false)}
+                      />
+                      <div className="absolute inset-x-0 top-20 bottom-0 flex flex-col bg-white rounded-t-2xl shadow-2xl animate-in slide-in-from-bottom duration-300">
+                        <div className="flex justify-center pt-3 pb-1">
+                          <div className="w-8 h-1 bg-gray-300 rounded-full"></div>
+                        </div>
+                        <div className="flex-shrink-0 bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
+                          <h2 className="text-lg font-semibold text-gray-900">Destination</h2>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setIsDestinationLocationOpen(false)}
+                            className="h-8 w-8 p-0 rounded-full hover:bg-gray-100"
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                        <div className="flex-1 overflow-y-auto p-4">
+                          <div className="space-y-3">
+                            <div className="text-center mb-4">
+                              <div className="flex justify-center gap-2 mb-3">
+                                <Button
+                                  variant={!pickupIsAirport ? "default" : "outline"}
+                                  size="sm"
+                                  onClick={() => setPickupIsAirport(false)}
+                                  className="flex items-center gap-2"
+                                >
+                                  <Plane className="w-4 h-4" />
+                                  Airport
+                                </Button>
+                                <Button
+                                  variant={pickupIsAirport ? "default" : "outline"}
+                                  size="sm"
+                                  onClick={() => setPickupIsAirport(true)}
+                                  className="flex items-center gap-2"
+                                >
+                                  <MapPin className="w-4 h-4" />
+                                  City
+                                </Button>
+                              </div>
+                            </div>
+                            {!pickupIsAirport ? (
+                              <div className="space-y-2">
+                                {airports.map((airport) => (
+                                  <Button
+                                    key={airport}
+                                    variant={formData.destination === airport ? "default" : "outline"}
+                                    className="w-full justify-start text-left h-auto p-3"
+                                    onClick={() => {
+                                      handleAddressChange('destination', airport);
+                                      setIsDestinationLocationOpen(false);
+                                    }}
+                                  >
+                                    <div className="flex items-center gap-3">
+                                      <Plane className="w-4 h-4 text-gray-500" />
+                                      <div>
+                                        <p className="font-medium text-sm">{airport.split(',')[0]}</p>
+                                        <p className="text-xs text-gray-500">{airport.split(',').slice(1).join(',')}</p>
+                                      </div>
+                                    </div>
+                                  </Button>
+                                ))}
+                              </div>
+                            ) : (
+                              <div className="space-y-3">
+                                <AddressInput
+                                  value={formData.destination}
+                                  onChange={(address) => {
+                                    handleAddressChange('destination', address);
+                                    if (address) setIsDestinationLocationOpen(false);
+                                  }}
+                                  placeholder="Enter destination address"
+                                  icon="destination"
+                                  className="w-full h-12 border-2 border-gray-300 rounded-lg text-base"
+                                />
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>,
+                    document.body
+                  )}
+
+                  {/* Date & Time Modal */}
+                  {isMounted && isDateTimeOpen && createPortal(
+                    <div className="fixed inset-0 z-[9999] md:hidden">
+                      <div 
+                        className="absolute inset-0 bg-black/50 backdrop-blur-sm" 
+                        onClick={() => setIsDateTimeOpen(false)}
+                      />
+                      <div className="absolute inset-x-0 top-20 bottom-0 flex flex-col bg-white rounded-t-2xl shadow-2xl animate-in slide-in-from-bottom duration-300">
+                        <div className="flex justify-center pt-3 pb-1">
+                          <div className="w-8 h-1 bg-gray-300 rounded-full"></div>
+                        </div>
+                        <div className="flex-shrink-0 bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
+                          <h2 className="text-lg font-semibold text-gray-900">Select Date & Time</h2>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setIsDateTimeOpen(false)}
+                            className="h-8 w-8 p-0 rounded-full hover:bg-gray-100"
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                        <div className="flex-1 overflow-y-auto p-4">
+                          <div className="space-y-6">
+                            {/* Date Selection */}
+                            <div>
+                              <h3 className="text-sm font-semibold text-gray-800 mb-3">Select Date</h3>
+                              <Calendar
+                                mode="single"
+                                selected={formData.date}
+                                onSelect={handleDateChange}
+                                disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+                                className="rounded-md border w-full"
+                              />
+                            </div>
+                            
+                            {/* Time Selection */}
+                            <div>
+                              <h3 className="text-sm font-semibold text-gray-800 mb-3">Select Time</h3>
+                              <div className="grid grid-cols-2 gap-2 max-h-60 overflow-y-auto">
+                                {generateTimeOptions().map((time) => (
+                                  <Button
+                                    key={time.value}
+                                    variant={formData.time === time.value ? "default" : "outline"}
+                                    size="sm"
+                                    onClick={() => handleTimeChange(time.value)}
+                                    className="justify-center text-sm"
+                                  >
+                                    {time.label}
+                                  </Button>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex-shrink-0 p-4 border-t border-gray-200">
+                          <Button
+                            onClick={() => setIsDateTimeOpen(false)}
+                            disabled={!formData.date || !formData.time}
+                            className="w-full"
+                          >
+                            Confirm Date & Time
+                          </Button>
+                        </div>
+                      </div>
+                    </div>,
+                    document.body
+                  )}
+
+                  {/* Vehicle & Passengers Modal */}
+                  {isMounted && isVehiclePassengerOpen && createPortal(
+                    <div className="fixed inset-0 z-[9999] md:hidden">
+                      <div 
+                        className="absolute inset-0 bg-black/50 backdrop-blur-sm" 
+                        onClick={() => setIsVehiclePassengerOpen(false)}
+                      />
+                      <div className="absolute inset-x-0 top-20 bottom-0 flex flex-col bg-white rounded-t-2xl shadow-2xl animate-in slide-in-from-bottom duration-300">
+                        <div className="flex justify-center pt-3 pb-1">
+                          <div className="w-8 h-1 bg-gray-300 rounded-full"></div>
+                        </div>
+                        <div className="flex-shrink-0 bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
+                          <h2 className="text-lg font-semibold text-gray-900">Vehicle & Passengers</h2>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setIsVehiclePassengerOpen(false)}
+                            className="h-8 w-8 p-0 rounded-full hover:bg-gray-100"
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                        <div className="flex-1 overflow-y-auto p-4">
+                          <div className="space-y-6">
+                            {/* Vehicle Selection */}
+                            <div>
+                              <h3 className="text-sm font-semibold text-gray-800 mb-3">Choose Vehicle</h3>
+                              <div className="space-y-3">
+                                {[
+                                  { id: 'sedan', icon: Car, name: 'Sedan', passengers: '3', description: 'Perfect for city trips' },
+                                  { id: 'suv', icon: Truck, name: 'SUV', passengers: '6', description: 'Comfortable for families' },
+                                  { id: 'van', icon: Bus, name: 'Van', passengers: '8', description: 'Ideal for groups' }
+                                ].map((vehicle) => (
+                                  <Button
+                                    key={vehicle.id}
+                                    variant={formData.vehicle === vehicle.id ? "default" : "outline"}
+                                    className="w-full h-auto p-4 justify-start text-left"
+                                    onClick={() => handleSelectChange('vehicle', vehicle.id)}
+                                  >
+                                    <div className="flex items-center gap-4 w-full">
+                                      <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                        <vehicle.icon className="w-6 h-6 text-gray-600" />
+                                      </div>
+                                      <div className="flex-1">
+                                        <h4 className="font-semibold text-gray-800">{vehicle.name}</h4>
+                                        <p className="text-sm text-gray-600">{vehicle.description}</p>
+                                        <p className="text-xs text-gray-500">Up to {vehicle.passengers} passengers</p>
+                                      </div>
+                                      <div className="text-right">
+                                        <p className="font-bold text-red-500">
+                                          {estimatedPrices[vehicle.id as keyof typeof estimatedPrices]} MAD
+                                        </p>
+                                        {routeInfo && (
+                                          <p className="text-xs text-gray-500">
+                                            ~{routeInfo.distance}
+                                          </p>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </Button>
+                                ))}
+                              </div>
+                            </div>
+                            
+                            {/* Passenger Selection */}
+                            <div>
+                              <h3 className="text-sm font-semibold text-gray-800 mb-3">Number of Passengers</h3>
+                              <div className="grid grid-cols-4 gap-2">
+                                {[1,2,3,4,5,6,7,8].map(num => (
+                                  <Button
+                                    key={num}
+                                    variant={formData.passengers === num.toString() ? "default" : "outline"}
+                                    size="sm"
+                                    onClick={() => handleSelectChange('passengers', num.toString())}
+                                    className="aspect-square"
+                                  >
+                                    {num}
+                                  </Button>
+                                ))}
+                              </div>
+                              <p className="text-xs text-gray-500 mt-2">
+                                {formData.passengers} passenger{formData.passengers !== '1' ? 's' : ''} selected
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex-shrink-0 p-4 border-t border-gray-200">
+                          <Button
+                            onClick={() => setIsVehiclePassengerOpen(false)}
+                            disabled={!formData.vehicle || !formData.passengers}
+                            className="w-full"
+                          >
+                            Confirm Selection
+                          </Button>
+                        </div>
+                      </div>
+                    </div>,
+                    document.body
+                  )}
+                </>
               )}
 
               {/* Car Rental Form */}
