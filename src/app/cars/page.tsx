@@ -631,11 +631,20 @@ function CarListingContent() {
                 
                 {/* Mobile Full-Screen Modal */}
                 {isPickupDateOpen && (
-                  <div className="fixed inset-0 z-50 md:hidden">
-                    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setIsPickupDateOpen(false)} />
-                    <div className="fixed inset-x-0 top-0 h-full bg-white animate-in slide-in-from-bottom duration-300">
+                  <div className="fixed inset-0 z-[9999] md:hidden">
+                    {/* Backdrop */}
+                    <div 
+                      className="absolute inset-0 bg-black/50 backdrop-blur-sm" 
+                      onClick={() => setIsPickupDateOpen(false)} 
+                    />
+                    
+                    {/* Modal Container */}
+                    <div className="absolute inset-0 flex flex-col bg-white">
                       {/* Header */}
-                      <div className="bg-white border-b border-gray-200 rounded-t-2xl px-4 py-4 flex items-center justify-between shadow-sm" style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}>
+                      <div 
+                        className="flex-shrink-0 bg-white border-b border-gray-200 px-4 py-4 flex items-center justify-between shadow-sm"
+                        style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}
+                      >
                         <h2 className="text-lg font-semibold text-gray-900">Select Rental Dates</h2>
                         <Button
                           variant="ghost"
@@ -648,8 +657,8 @@ function CarListingContent() {
                       </div>
                       
                       {/* Content */}
-                      <div className="flex-1 overflow-y-auto p-4 pb-safe">
-                        <div className="space-y-6">
+                      <div className="flex-1 overflow-y-auto p-4">
+                        <div className="space-y-6 max-w-full">
                           <div>
                             <label className="block text-sm font-medium text-gray-700 mb-3">Pickup Date</label>
                             <Calendar
@@ -678,7 +687,7 @@ function CarListingContent() {
                             <div>
                               <label className="block text-sm font-medium text-gray-700 mb-2">Pickup time</label>
                               <Select value={searchFormData.pickupTime} onValueChange={(value) => handleSearchFormChange('pickupTime', value)}>
-                                <SelectTrigger className="h-11">
+                                <SelectTrigger className="h-11 w-full">
                                   <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -696,7 +705,7 @@ function CarListingContent() {
                             <div>
                               <label className="block text-sm font-medium text-gray-700 mb-2">Drop-off time</label>
                               <Select value={searchFormData.returnTime} onValueChange={(value) => handleSearchFormChange('returnTime', value)}>
-                                <SelectTrigger className="h-11">
+                                <SelectTrigger className="h-11 w-full">
                                   <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -724,7 +733,10 @@ function CarListingContent() {
                       </div>
                       
                       {/* Bottom Action */}
-                      <div className="border-t border-gray-200 p-4 bg-white">
+                      <div 
+                        className="flex-shrink-0 border-t border-gray-200 p-4 bg-white"
+                        style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}
+                      >
                         <Button 
                           onClick={() => setIsPickupDateOpen(false)}
                           className="w-full h-12 bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white font-semibold rounded-xl"
@@ -856,11 +868,20 @@ function CarListingContent() {
                 
                 {/* Mobile Full-Screen Modal */}
                 {isFiltersOpen && (
-                  <div className="fixed inset-0 z-50 md:hidden">
-                    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setIsFiltersOpen(false)} />
-                    <div className="fixed inset-x-0 top-0 h-full bg-white animate-in slide-in-from-bottom duration-300">
+                  <div className="fixed inset-0 z-[9999] md:hidden">
+                    {/* Backdrop */}
+                    <div 
+                      className="absolute inset-0 bg-black/50 backdrop-blur-sm" 
+                      onClick={() => setIsFiltersOpen(false)} 
+                    />
+                    
+                    {/* Modal Container */}
+                    <div className="absolute inset-0 flex flex-col bg-white">
                       {/* Header */}
-                      <div className="bg-white border-b border-gray-200 rounded-t-2xl px-4 py-4 flex items-center justify-between shadow-sm" style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}>
+                      <div 
+                        className="flex-shrink-0 bg-white border-b border-gray-200 px-4 py-4 flex items-center justify-between shadow-sm"
+                        style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}
+                      >
                         <div className="flex items-center">
                           <h2 className="text-lg font-semibold text-gray-900">Filters</h2>
                           {(searchFormData.carCategory !== 'all' || 
@@ -913,8 +934,8 @@ function CarListingContent() {
                       </div>
                       
                       {/* Content */}
-                      <div className="flex-1 overflow-y-auto p-4 pb-safe">
-                        <div className="space-y-6">
+                      <div className="flex-1 overflow-y-auto p-4">
+                        <div className="space-y-6 max-w-full">
                           {/* Price Range */}
                           <div className="space-y-3">
                             <label className="block text-sm font-medium text-gray-700">Price per day (MAD)</label>
@@ -1004,7 +1025,10 @@ function CarListingContent() {
                       </div>
                       
                       {/* Bottom Action */}
-                      <div className="border-t border-gray-200 p-4 bg-white">
+                      <div 
+                        className="flex-shrink-0 border-t border-gray-200 p-4 bg-white"
+                        style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}
+                      >
                         <Button 
                           onClick={() => setIsFiltersOpen(false)}
                           className="w-full h-12 bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white font-semibold rounded-xl"
