@@ -639,17 +639,30 @@ function CarListingContent() {
                 
                 {/* Mobile Bottom Sheet Modal - Rendered via Portal */}
                 {isMounted && isPickupDateOpen && createPortal(
-                  <div className="fixed inset-0 z-[9999] md:hidden">
+                  <div 
+                    className="fixed inset-0 z-[9999] md:hidden"
+                    onClick={(e) => {
+                      // Only close if clicking the backdrop itself
+                      if (e.target === e.currentTarget) {
+                        setIsPickupDateOpen(false);
+                      }
+                    }}
+                  >
                     {/* Backdrop */}
-                    <div 
-                      className="absolute inset-0 bg-black/50 backdrop-blur-sm" 
-                      onClick={() => setIsPickupDateOpen(false)} 
-                    />
+                    <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
                     
                     {/* Bottom Sheet Container */}
-                    <div className="absolute inset-x-0 top-20 bottom-0 flex flex-col bg-white rounded-t-2xl shadow-2xl animate-in slide-in-from-bottom duration-300">
+                    <div 
+                      className="absolute inset-x-0 top-20 bottom-0 flex flex-col bg-white rounded-t-2xl shadow-2xl animate-in slide-in-from-bottom duration-300"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {/* Drag Handle */}
+                      <div className="flex justify-center pt-3 pb-1">
+                        <div className="w-8 h-1 bg-gray-300 rounded-full"></div>
+                      </div>
+                      
                       {/* Header */}
-                      <div className="flex-shrink-0 bg-white border-b border-gray-200 rounded-t-2xl px-4 py-4 flex items-center justify-between">
+                      <div className="flex-shrink-0 bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
                         <h2 className="text-lg font-semibold text-gray-900">Select Rental Dates</h2>
                         <Button
                           variant="ghost"
@@ -666,30 +679,34 @@ function CarListingContent() {
                         <div className="space-y-6 max-w-full">
                           <div>
                             <label className="block text-sm font-medium text-gray-700 mb-3">Pickup Date</label>
-                            <Calendar
-                              mode="single"
-                              selected={searchFormData.pickupDate}
-                              onSelect={(date) => handleSearchFormChange('pickupDate', date)}
-                              disabled={(date) => date < new Date()}
-                              className="rounded-xl border border-gray-200 w-full"
-                            />
+                            <div onClick={(e) => e.stopPropagation()}>
+                              <Calendar
+                                mode="single"
+                                selected={searchFormData.pickupDate}
+                                onSelect={(date) => handleSearchFormChange('pickupDate', date)}
+                                disabled={(date) => date < new Date()}
+                                className="rounded-xl border border-gray-200 w-full"
+                              />
+                            </div>
                           </div>
                           
                           <div>
                             <label className="block text-sm font-medium text-gray-700 mb-3">Return Date</label>
-                            <Calendar
-                              mode="single"
-                              selected={searchFormData.returnDate}
-                              onSelect={(date) => handleSearchFormChange('returnDate', date)}
-                              disabled={(date) => 
-                                date < new Date() || (searchFormData.pickupDate ? date < searchFormData.pickupDate : false)
-                              }
-                              className="rounded-xl border border-gray-200 w-full"
-                            />
+                            <div onClick={(e) => e.stopPropagation()}>
+                              <Calendar
+                                mode="single"
+                                selected={searchFormData.returnDate}
+                                onSelect={(date) => handleSearchFormChange('returnDate', date)}
+                                disabled={(date) => 
+                                  date < new Date() || (searchFormData.pickupDate ? date < searchFormData.pickupDate : false)
+                                }
+                                className="rounded-xl border border-gray-200 w-full"
+                              />
+                            </div>
                           </div>
                           
                           <div className="grid grid-cols-2 gap-4">
-                            <div>
+                            <div onClick={(e) => e.stopPropagation()}>
                               <label className="block text-sm font-medium text-gray-700 mb-2">Pickup time</label>
                               <Select value={searchFormData.pickupTime} onValueChange={(value) => handleSearchFormChange('pickupTime', value)}>
                                 <SelectTrigger className="h-11 w-full">
@@ -707,7 +724,7 @@ function CarListingContent() {
                                 </SelectContent>
                               </Select>
                             </div>
-                            <div>
+                            <div onClick={(e) => e.stopPropagation()}>
                               <label className="block text-sm font-medium text-gray-700 mb-2">Drop-off time</label>
                               <Select value={searchFormData.returnTime} onValueChange={(value) => handleSearchFormChange('returnTime', value)}>
                                 <SelectTrigger className="h-11 w-full">
@@ -739,7 +756,7 @@ function CarListingContent() {
                       
                       {/* Bottom Action */}
                       <div 
-                        className="flex-shrink-0 border-t border-gray-200 p-4 bg-white rounded-b-2xl"
+                        className="flex-shrink-0 border-t border-gray-200 p-4 bg-white"
                         style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}
                       >
                         <Button 
@@ -874,17 +891,30 @@ function CarListingContent() {
                 
                 {/* Mobile Bottom Sheet Modal - Rendered via Portal */}
                 {isMounted && isFiltersOpen && createPortal(
-                  <div className="fixed inset-0 z-[9999] md:hidden">
+                  <div 
+                    className="fixed inset-0 z-[9999] md:hidden"
+                    onClick={(e) => {
+                      // Only close if clicking the backdrop itself
+                      if (e.target === e.currentTarget) {
+                        setIsFiltersOpen(false);
+                      }
+                    }}
+                  >
                     {/* Backdrop */}
-                    <div 
-                      className="absolute inset-0 bg-black/50 backdrop-blur-sm" 
-                      onClick={() => setIsFiltersOpen(false)} 
-                    />
+                    <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
                     
                     {/* Bottom Sheet Container */}
-                    <div className="absolute inset-x-0 top-20 bottom-0 flex flex-col bg-white rounded-t-2xl shadow-2xl animate-in slide-in-from-bottom duration-300">
+                    <div 
+                      className="absolute inset-x-0 top-20 bottom-0 flex flex-col bg-white rounded-t-2xl shadow-2xl animate-in slide-in-from-bottom duration-300"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {/* Drag Handle */}
+                      <div className="flex justify-center pt-3 pb-1">
+                        <div className="w-8 h-1 bg-gray-300 rounded-full"></div>
+                      </div>
+                      
                       {/* Header */}
-                      <div className="flex-shrink-0 bg-white border-b border-gray-200 rounded-t-2xl px-4 py-4 flex items-center justify-between">
+                      <div className="flex-shrink-0 bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
                         <div className="flex items-center">
                           <h2 className="text-lg font-semibold text-gray-900">Filters</h2>
                           {(searchFormData.carCategory !== 'all' || 
@@ -940,7 +970,7 @@ function CarListingContent() {
                       <div className="flex-1 overflow-y-auto p-4">
                         <div className="space-y-6 max-w-full">
                           {/* Price Range */}
-                          <div className="space-y-3">
+                          <div className="space-y-3" onClick={(e) => e.stopPropagation()}>
                             <label className="block text-sm font-medium text-gray-700">Price per day (MAD)</label>
                             <div className="flex items-center space-x-3">
                               <Input
@@ -962,7 +992,7 @@ function CarListingContent() {
                           </div>
 
                           {/* Transmission */}
-                          <div className="space-y-3">
+                          <div className="space-y-3" onClick={(e) => e.stopPropagation()}>
                             <label className="block text-sm font-medium text-gray-700">Transmission</label>
                             <Select value={filters.transmission} onValueChange={(value) => handleFilterChange('transmission', value)}>
                               <SelectTrigger className="w-full h-11">
@@ -977,7 +1007,7 @@ function CarListingContent() {
                           </div>
 
                           {/* Fuel Type */}
-                          <div className="space-y-3">
+                          <div className="space-y-3" onClick={(e) => e.stopPropagation()}>
                             <label className="block text-sm font-medium text-gray-700">Fuel Type</label>
                             <Select value={filters.fuelType} onValueChange={(value) => handleFilterChange('fuelType', value)}>
                               <SelectTrigger className="w-full h-11">
@@ -993,7 +1023,7 @@ function CarListingContent() {
                           </div>
 
                           {/* Number of Seats */}
-                          <div className="space-y-3">
+                          <div className="space-y-3" onClick={(e) => e.stopPropagation()}>
                             <label className="block text-sm font-medium text-gray-700">Number of Seats</label>
                             <Select value={filters.seats} onValueChange={(value) => handleFilterChange('seats', value)}>
                               <SelectTrigger className="w-full h-11">
@@ -1010,7 +1040,7 @@ function CarListingContent() {
                           </div>
 
                           {/* Agency */}
-                          <div className="space-y-3">
+                          <div className="space-y-3" onClick={(e) => e.stopPropagation()}>
                             <label className="block text-sm font-medium text-gray-700">Rental Agency</label>
                             <Select value={filters.agency} onValueChange={(value) => handleFilterChange('agency', value)}>
                               <SelectTrigger className="w-full h-11">
@@ -1029,7 +1059,7 @@ function CarListingContent() {
                       
                       {/* Bottom Action */}
                       <div 
-                        className="flex-shrink-0 border-t border-gray-200 p-4 bg-white rounded-b-2xl"
+                        className="flex-shrink-0 border-t border-gray-200 p-4 bg-white"
                         style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}
                       >
                         <Button 
