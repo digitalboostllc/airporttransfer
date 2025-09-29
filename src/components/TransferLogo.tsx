@@ -55,7 +55,7 @@ export default function TransferLogo({
       
       {/* Optional Text */}
       {showText && (
-        <span className={`font-[family-name:var(--font-bungee)] text-gray-800 tracking-wide ${textClassName}`}>
+        <span className={`font-bold text-gray-800 tracking-wide ${textClassName}`}>
           venboo
         </span>
       )}
