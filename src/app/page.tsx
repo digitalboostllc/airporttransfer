@@ -464,14 +464,12 @@ export default function Home() {
 
               {/* Transfer Form */}
               {activeService === 'transfer' && (
-                <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
+                <form onSubmit={handleSubmit} className="space-y-3">
                 {/* Step 1: Route & Time */}
-                <div className="form-step space-y-3 bg-gray-50/50 rounded-lg p-3 sm:p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
-                      <MapPin className="w-4 h-4 text-red-600" />
-                    </div>
-                    <h3 className="text-sm font-semibold text-gray-800">Where & When</h3>
+                <div className="form-step space-y-1.5">
+                  <div className="flex items-center gap-1.5 mb-1.5">
+                    <MapPin className="w-3.5 h-3.5 text-red-500" />
+                    <h3 className="text-xs font-semibold text-gray-800">Where & When</h3>
                   </div>
                   {/* Integrated Layout: Inputs with Swap Button Between */}
                   <div className="space-y-2">
@@ -482,7 +480,7 @@ export default function Home() {
                           <>
                             <Plane className="absolute left-2.5 top-1/2 transform -translate-y-1/2 w-3.5 h-3.5 text-gray-500 z-20 pointer-events-none" />
                             <Select onValueChange={(value) => handleAddressChange('pickup', value)} value={formData.pickup}>
-                              <SelectTrigger className="w-full pl-8 h-12 sm:h-11 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all duration-200 bg-white hover:border-red-300 shadow-sm text-gray-800 text-sm">
+                              <SelectTrigger className="w-full pl-8 h-9 border border-gray-300 rounded-md focus:ring-1 focus:ring-red-500 focus:border-red-500 transition-all duration-200 bg-white hover:border-red-300 shadow-sm text-gray-800 text-xs">
                                 <SelectValue placeholder="From airport" />
                               </SelectTrigger>
                               <SelectContent>
@@ -500,7 +498,7 @@ export default function Home() {
                             onChange={(address) => handleAddressChange('pickup', address)}
                             placeholder="From location"
                             icon="pickup"
-                            className="w-full pl-8 h-12 sm:h-11 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all duration-200 bg-white hover:border-red-300 shadow-sm text-gray-800 text-sm"
+                            className="w-full pl-8 h-9 border border-gray-300 rounded-md focus:ring-1 focus:ring-red-500 focus:border-red-500 transition-all duration-200 bg-white hover:border-red-300 shadow-sm text-gray-800 text-xs"
                           />
                         )}
                       </div>
@@ -511,10 +509,10 @@ export default function Home() {
                           type="button"
                           onClick={handleSwapLocations}
                           disabled={!formData.destination}
-                          className="w-10 h-10 bg-white border-2 border-gray-200 hover:border-red-300 rounded-full shadow-sm hover:shadow-md transition-all duration-200 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed group"
+                          className="w-9 h-9 bg-white border border-gray-200 hover:border-red-300 rounded-full shadow-sm hover:shadow-md transition-all duration-200 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed group"
                           title="Swap pickup and destination"
                         >
-                          <RotateCcw className="w-4 h-4 text-gray-600 group-hover:text-red-500 transition-colors duration-200 group-hover:rotate-180" />
+                          <RotateCcw className="w-3.5 h-3.5 text-gray-600 group-hover:text-red-500 transition-colors duration-200 group-hover:rotate-180" />
                         </button>
         </div>
 
@@ -524,7 +522,7 @@ export default function Home() {
                           <>
                             <Plane className="absolute left-2.5 top-1/2 transform -translate-y-1/2 w-3.5 h-3.5 text-gray-500 z-20 pointer-events-none" />
                             <Select onValueChange={(value) => handleAddressChange('destination', value)} value={formData.destination}>
-                              <SelectTrigger className="w-full pl-8 h-12 sm:h-11 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all duration-200 bg-white hover:border-red-300 shadow-sm text-gray-800 text-sm">
+                              <SelectTrigger className="w-full pl-8 h-9 border border-gray-300 rounded-md focus:ring-1 focus:ring-red-500 focus:border-red-500 transition-all duration-200 bg-white hover:border-red-300 shadow-sm text-gray-800 text-xs">
                                 <SelectValue placeholder="To airport" />
                               </SelectTrigger>
                               <SelectContent>
@@ -542,25 +540,25 @@ export default function Home() {
                             onChange={(address) => handleAddressChange('destination', address)}
                             placeholder="To location"
                             icon="destination"
-                            className="w-full pl-8 h-12 sm:h-11 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all duration-200 bg-white hover:border-red-300 shadow-sm text-gray-800 text-sm"
+                            className="w-full pl-8 h-9 border border-gray-300 rounded-md focus:ring-1 focus:ring-red-500 focus:border-red-500 transition-all duration-200 bg-white hover:border-red-300 shadow-sm text-gray-800 text-xs"
                           />
                         )}
                       </div>
                     </div>
                   </div>
                       
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
+                      <div className="grid grid-cols-3 gap-1.5">
                     <Popover>
                       <PopoverTrigger asChild>
                         <Button
                           variant="outline"
                           className={cn(
-                            "w-full h-12 sm:h-11 px-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all duration-200 bg-white hover:border-red-300 shadow-sm text-gray-800 justify-start text-left font-normal text-sm",
+                            "w-full h-9 px-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-red-500 focus:border-red-500 transition-all duration-200 bg-white hover:border-red-300 shadow-sm text-gray-800 justify-start text-left font-normal text-xs",
                             !formData.date && "text-gray-500"
                           )}
                         >
-                          <CalendarIcon className="mr-2 h-4 w-4" />
-                          {formData.date ? format(formData.date, "MMM dd, yyyy") : "Select date"}
+                          <CalendarIcon className="mr-1.5 h-3.5 w-3.5" />
+                          {formData.date ? format(formData.date, "MMM dd") : "Date"}
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0">
@@ -612,11 +610,11 @@ export default function Home() {
                       </PopoverContent>
                     </Popover>
 
-                    <div className="relative sm:hidden">
+                    <div className="relative">
                       <Users className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500 z-20 pointer-events-none" />
                       <Select onValueChange={(value) => handleSelectChange('passengers', value)} defaultValue="1">
-                        <SelectTrigger className="w-full pl-10 h-12 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all duration-200 bg-white hover:border-red-300 shadow-sm text-gray-800 text-sm">
-                          <SelectValue placeholder="Passengers" />
+                        <SelectTrigger className="w-full pl-10 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all duration-200 bg-white hover:border-red-300 shadow-sm text-gray-800">
+                          <SelectValue placeholder="Guests" />
                         </SelectTrigger>
                         <SelectContent>
                           {[1,2,3,4,5,6,7,8].map(num => (
@@ -715,25 +713,24 @@ export default function Home() {
                       </div>
                 </div>
 
-                <div className="form-step pt-2">
+                <div className="form-step pt-1">
                   <button
                     type="submit"
-                    className="w-full premium-button text-white font-bold px-6 py-4 sm:py-3 rounded-xl text-sm sm:text-base tracking-wide transition-all duration-300 flex items-center justify-center gap-2 shadow-lg"
+                    className="w-full premium-button text-white font-bold px-4 py-2.5 rounded-lg text-xs tracking-wide transition-all duration-300 flex items-center justify-center"
                   >
-                    <Plane className="w-4 h-4" />
-                    Book My Transfer Now
+                    Book My Ride Now
                   </button>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs text-gray-500 mt-3">
-                    <div className="flex items-center justify-center gap-1.5">
-                      <Check className="w-3 h-3 text-green-500" />
+                  <div className="flex items-center justify-center gap-2 text-xs text-gray-500 mt-1.5">
+                    <div className="flex items-center gap-0.5">
+                      <Check className="w-2.5 h-2.5 text-green-500" />
                       <span>Instant confirmation</span>
                     </div>
-                    <div className="flex items-center justify-center gap-1.5">
-                      <X className="w-3 h-3 text-red-500" />
+                    <div className="flex items-center gap-0.5">
+                      <X className="w-2.5 h-2.5 text-red-500" />
                       <span>No hidden fees</span>
                     </div>
-                    <div className="flex items-center justify-center gap-1.5">
-                      <Star className="w-3 h-3 text-yellow-500" />
+                    <div className="flex items-center gap-0.5">
+                      <Star className="w-2.5 h-2.5 text-yellow-500" />
                       <span>Professional drivers</span>
                     </div>
                   </div>
@@ -743,14 +740,12 @@ export default function Home() {
 
               {/* Car Rental Form */}
               {activeService === 'rental' && (
-                <form onSubmit={handleRentalSubmit} className="space-y-4 sm:space-y-5">
+                <form onSubmit={handleRentalSubmit} className="space-y-3">
                   {/* Step 1: Location & Dates */}
-                  <div className="form-step space-y-3 bg-gray-50/50 rounded-lg p-3 sm:p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                        <MapPin className="w-4 h-4 text-blue-600" />
-                      </div>
-                      <h3 className="text-sm font-semibold text-gray-800">Pickup Location & Dates</h3>
+                  <div className="form-step space-y-1.5">
+                    <div className="flex items-center gap-1.5 mb-1.5">
+                      <MapPin className="w-3.5 h-3.5 text-red-500" />
+                      <h3 className="text-xs font-semibold text-gray-800">Pickup Location & Dates</h3>
                     </div>
                     
                     {/* Location */}
@@ -761,24 +756,24 @@ export default function Home() {
                           onChange={(address) => setRentalFormData(prev => ({ ...prev, location: address }))}
                           placeholder="Pickup location"
                           icon="pickup"
-                          className="w-full pl-8 h-12 sm:h-11 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all duration-200 bg-white hover:border-red-300 shadow-sm text-gray-800 text-sm"
+                          className="w-full pl-8 h-9 border border-gray-300 rounded-md focus:ring-1 focus:ring-red-500 focus:border-red-500 transition-all duration-200 bg-white hover:border-red-300 shadow-sm text-gray-800 text-xs"
                         />
                       </div>
                     </div>
 
                     {/* Pickup and Return Dates */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="grid grid-cols-2 gap-1.5">
                       <Popover>
                         <PopoverTrigger asChild>
                           <Button
                             variant="outline"
                             className={cn(
-                              "w-full h-12 sm:h-11 px-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all duration-200 bg-white hover:border-red-300 shadow-sm text-gray-800 justify-start text-left font-normal text-sm",
+                              "w-full h-9 px-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-red-500 focus:border-red-500 transition-all duration-200 bg-white hover:border-red-300 shadow-sm text-gray-800 justify-start text-left font-normal text-xs",
                               !rentalFormData.pickupDate && "text-gray-500"
                             )}
                           >
-                            <CalendarIcon className="mr-2 h-4 w-4" />
-                            {rentalFormData.pickupDate ? format(rentalFormData.pickupDate, "MMM dd, yyyy") : "Pickup date"}
+                            <CalendarIcon className="mr-1.5 h-3.5 w-3.5" />
+                            {rentalFormData.pickupDate ? format(rentalFormData.pickupDate, "MMM dd") : "Pickup"}
                           </Button>
                         </PopoverTrigger>
                         <PopoverContent className="w-auto p-0">
@@ -797,12 +792,12 @@ export default function Home() {
                           <Button
                             variant="outline"
                             className={cn(
-                              "w-full h-12 sm:h-11 px-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all duration-200 bg-white hover:border-red-300 shadow-sm text-gray-800 justify-start text-left font-normal text-sm",
+                              "w-full h-9 px-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-red-500 focus:border-red-500 transition-all duration-200 bg-white hover:border-red-300 shadow-sm text-gray-800 justify-start text-left font-normal text-xs",
                               !rentalFormData.returnDate && "text-gray-500"
                             )}
                           >
-                            <CalendarIcon className="mr-2 h-4 w-4" />
-                            {rentalFormData.returnDate ? format(rentalFormData.returnDate, "MMM dd, yyyy") : "Return date"}
+                            <CalendarIcon className="mr-1.5 h-3.5 w-3.5" />
+                            {rentalFormData.returnDate ? format(rentalFormData.returnDate, "MMM dd") : "Return"}
                           </Button>
                         </PopoverTrigger>
                         <PopoverContent className="w-auto p-0">
@@ -859,14 +854,12 @@ export default function Home() {
                   </div>
 
                   {/* Step 2: Choose Car Category */}
-                  <div className="form-step space-y-3 bg-gray-50/50 rounded-lg p-3 sm:p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                        <Car className="w-4 h-4 text-green-600" />
-                      </div>
-                      <h3 className="text-sm font-semibold text-gray-800">Car Category</h3>
+                  <div className="form-step space-y-1.5">
+                    <div className="flex items-center gap-1.5 mb-1.5">
+                      <Car className="w-3.5 h-3.5 text-red-500" />
+                      <h3 className="text-xs font-semibold text-gray-800">Car Category</h3>
                     </div>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    <div className="grid grid-cols-3 gap-1.5">
                       {[
                         { id: 'economy', name: 'Economy', color: 'bg-blue-50 border-blue-200' },
                         { id: 'compact', name: 'Compact', color: 'bg-green-50 border-green-200' },
@@ -874,20 +867,20 @@ export default function Home() {
                         { id: 'luxury', name: 'Luxury', color: 'bg-purple-50 border-purple-200' },
                         { id: 'suv', name: 'SUV', color: 'bg-red-50 border-red-200' },
                         { id: 'van', name: 'Van', color: 'bg-indigo-50 border-indigo-200' }
-                      ].slice(0, 4).map((category) => (
+                      ].slice(0, 3).map((category) => (
                         <div
                           key={category.id}
                           className={cn(
-                            "car-3d-card p-3 sm:p-2 rounded-lg text-center cursor-pointer border-2 transition-all duration-300 min-h-[80px] flex flex-col justify-center",
-                            rentalFormData.carCategory === category.id ? "ring-2 ring-red-500 border-red-300 shadow-md" : "hover:shadow-sm",
+                            "car-3d-card p-1.5 rounded-md text-center cursor-pointer border transition-all duration-300",
+                            rentalFormData.carCategory === category.id ? "ring-1 ring-red-500 border-red-300" : "",
                             category.color
                           )}
                           onClick={() => handleRentalSelectChange('carCategory', category.id)}
                         >
-                          <div className="car-3d-icon w-6 h-6 mx-auto mb-2 flex items-center justify-center">
-                            <Car className="w-5 h-5 text-gray-700" />
+                          <div className="car-3d-icon w-4 h-4 mx-auto mb-0.5 flex items-center justify-center">
+                            <Car className="w-3.5 h-3.5 text-gray-700" />
                           </div>
-                          <h4 className="font-semibold text-gray-800 text-sm mb-1">{category.name}</h4>
+                          <h4 className="font-semibold text-gray-800 text-xs mb-0.5">{category.name}</h4>
                           <p className="text-xs text-gray-600">From 200 MAD/day</p>
                         </div>
                       ))}
@@ -895,51 +888,46 @@ export default function Home() {
                   </div>
 
                   {/* Step 3: Contact Info */}
-                  <div className="form-step space-y-3 bg-gray-50/50 rounded-lg p-3 sm:p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
-                        <Phone className="w-4 h-4 text-orange-600" />
-                      </div>
-                      <h3 className="text-sm font-semibold text-gray-800">Contact Details</h3>
+                  <div className="form-step space-y-1.5">
+                    <div className="flex items-center gap-1.5 mb-1.5">
+                      <Phone className="w-3.5 h-3.5 text-red-500" />
+                      <h3 className="text-xs font-semibold text-gray-800">Contact Details</h3>
                     </div>
-                    <div className="space-y-3">
+                    <div className="grid grid-cols-3 gap-1.5">
                       <Input
                         name="name"
                         value={rentalFormData.name}
                         onChange={handleRentalInputChange}
                         placeholder="Full Name"
-                        className="w-full h-12 sm:h-11 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all duration-200 bg-white hover:border-red-300 shadow-sm text-gray-800 placeholder-gray-500 text-sm"
+                        className="w-full h-9 border border-gray-300 rounded-md focus:ring-1 focus:ring-red-500 focus:border-red-500 transition-all duration-200 bg-white hover:border-red-300 shadow-sm text-gray-800 placeholder-gray-500 text-xs"
                         required
                       />
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <Input
-                          name="phone"
-                          type="tel"
-                          value={rentalFormData.phone}
-                          onChange={handleRentalInputChange}
-                          placeholder="+212 6XX XX XX XX"
-                          className="w-full h-12 sm:h-11 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all duration-200 bg-white hover:border-red-300 shadow-sm text-gray-800 placeholder-gray-500 text-sm"
-                          required
-                        />
-                        <Input
-                          name="email"
-                          type="email"
-                          value={rentalFormData.email}
-                          onChange={handleRentalInputChange}
-                          placeholder="your@email.com"
-                          className="w-full h-12 sm:h-11 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all duration-200 bg-white hover:border-red-300 shadow-sm text-gray-800 placeholder-gray-500 text-sm"
-                          required
-                        />
-                      </div>
+                      <Input
+                        name="phone"
+                        type="tel"
+                        value={rentalFormData.phone}
+                        onChange={handleRentalInputChange}
+                        placeholder="+212 6XX XX XX XX"
+                        className="w-full h-9 border border-gray-300 rounded-md focus:ring-1 focus:ring-red-500 focus:border-red-500 transition-all duration-200 bg-white hover:border-red-300 shadow-sm text-gray-800 placeholder-gray-500 text-xs"
+                        required
+                      />
+                      <Input
+                        name="email"
+                        type="email"
+                        value={rentalFormData.email}
+                        onChange={handleRentalInputChange}
+                        placeholder="your@email.com"
+                        className="w-full h-9 border border-gray-300 rounded-md focus:ring-1 focus:ring-red-500 focus:border-red-500 transition-all duration-200 bg-white hover:border-red-300 shadow-sm text-gray-800 placeholder-gray-500 text-xs"
+                        required
+                      />
                     </div>
                   </div>
 
-                  <div className="form-step pt-2">
+                  <div className="form-step pt-1">
                     <button
                       type="submit"
-                      className="w-full premium-button text-white font-bold px-6 py-4 sm:py-3 rounded-xl text-sm sm:text-base tracking-wide transition-all duration-300 flex items-center justify-center gap-2 shadow-lg"
+                      className="w-full premium-button text-white font-bold px-4 py-2.5 rounded-lg text-xs tracking-wide transition-all duration-300 flex items-center justify-center"
                     >
-                      <Car className="w-4 h-4" />
                       Find Available Cars
                     </button>
                     <div className="flex items-center justify-center gap-2 text-xs text-gray-500 mt-1.5">
