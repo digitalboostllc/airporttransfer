@@ -56,7 +56,7 @@ export default function TransferLogo({
       {/* Optional Text */}
       {showText && (
         <span className={`font-bold text-gray-800 tracking-wide ${textClassName}`}>
-          Venboo
+          VENBOO<span className="text-sm opacity-80">.com</span>
         </span>
       )}
     </div>
