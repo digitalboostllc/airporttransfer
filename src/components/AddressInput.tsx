@@ -297,6 +297,7 @@ export default function AddressInput({ value, onChange, placeholder, icon, class
               top: dropdownPosition.top,
               left: dropdownPosition.left,
               width: dropdownPosition.width,
+              zIndex: 100000 // Ensure it's above all modals
             }}
           >
             <div className="bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden">
