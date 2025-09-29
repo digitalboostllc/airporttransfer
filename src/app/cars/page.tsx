@@ -14,6 +14,7 @@ import {
   ChevronDown,
   Building2,
   Calendar as CalendarIcon,
+  X,
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -627,7 +628,117 @@ function CarListingContent() {
                     <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-[95vw] max-w-[600px] p-0" align="start">
+                
+                {/* Mobile Full-Screen Modal */}
+                {isPickupDateOpen && (
+                  <div className="fixed inset-0 z-50 md:hidden">
+                    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setIsPickupDateOpen(false)} />
+                    <div className="fixed inset-x-0 top-0 h-full bg-white animate-in slide-in-from-bottom duration-300">
+                      {/* Header */}
+                      <div className="bg-white border-b border-gray-200 rounded-t-2xl px-4 py-4 flex items-center justify-between shadow-sm" style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}>
+                        <h2 className="text-lg font-semibold text-gray-900">Select Rental Dates</h2>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setIsPickupDateOpen(false)}
+                          className="h-8 w-8 p-0 rounded-full hover:bg-gray-100"
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                      
+                      {/* Content */}
+                      <div className="flex-1 overflow-y-auto p-4 pb-safe">
+                        <div className="space-y-6">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-3">Pickup Date</label>
+                            <Calendar
+                              mode="single"
+                              selected={searchFormData.pickupDate}
+                              onSelect={(date) => handleSearchFormChange('pickupDate', date)}
+                              disabled={(date) => date < new Date()}
+                              className="rounded-xl border border-gray-200 w-full"
+                            />
+                          </div>
+                          
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-3">Return Date</label>
+                            <Calendar
+                              mode="single"
+                              selected={searchFormData.returnDate}
+                              onSelect={(date) => handleSearchFormChange('returnDate', date)}
+                              disabled={(date) => 
+                                date < new Date() || (searchFormData.pickupDate ? date < searchFormData.pickupDate : false)
+                              }
+                              className="rounded-xl border border-gray-200 w-full"
+                            />
+                          </div>
+                          
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-2">Pickup time</label>
+                              <Select value={searchFormData.pickupTime} onValueChange={(value) => handleSearchFormChange('pickupTime', value)}>
+                                <SelectTrigger className="h-11">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {Array.from({ length: 24 }, (_, i) => {
+                                    const time = `${String(i).padStart(2, '0')}:00`;
+                                    return (
+                                      <SelectItem key={time} value={time}>
+                                        {time}
+                                      </SelectItem>
+                                    );
+                                  })}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-2">Drop-off time</label>
+                              <Select value={searchFormData.returnTime} onValueChange={(value) => handleSearchFormChange('returnTime', value)}>
+                                <SelectTrigger className="h-11">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {Array.from({ length: 24 }, (_, i) => {
+                                    const time = `${String(i).padStart(2, '0')}:00`;
+                                    return (
+                                      <SelectItem key={time} value={time}>
+                                        {time}
+                                      </SelectItem>
+                                    );
+                                  })}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </div>
+                          
+                          <div className="bg-blue-50 rounded-xl p-4">
+                            <div className="text-sm text-blue-800 font-medium">
+                              Total: {searchFormData.pickupDate && searchFormData.returnDate ? 
+                                Math.max(1, Math.ceil((searchFormData.returnDate.getTime() - searchFormData.pickupDate.getTime()) / (1000 * 60 * 60 * 24))) : 0
+                              } days
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* Bottom Action */}
+                      <div className="border-t border-gray-200 p-4 bg-white">
+                        <Button 
+                          onClick={() => setIsPickupDateOpen(false)}
+                          className="w-full h-12 bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white font-semibold rounded-xl"
+                        >
+                          <CarIcon className="w-4 h-4 mr-2" />
+                          Search Cars
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                
+                {/* Desktop Popover */}
+                <PopoverContent className="w-[95vw] max-w-[600px] p-0 hidden md:block" align="start">
                   <div className="p-2 sm:p-3">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-2 sm:gap-3 mb-2 sm:mb-3">
                       <div>
@@ -742,7 +853,172 @@ function CarListingContent() {
                     <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-[95vw] max-w-[500px] p-0" align="end">
+                
+                {/* Mobile Full-Screen Modal */}
+                {isFiltersOpen && (
+                  <div className="fixed inset-0 z-50 md:hidden">
+                    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setIsFiltersOpen(false)} />
+                    <div className="fixed inset-x-0 top-0 h-full bg-white animate-in slide-in-from-bottom duration-300">
+                      {/* Header */}
+                      <div className="bg-white border-b border-gray-200 rounded-t-2xl px-4 py-4 flex items-center justify-between shadow-sm" style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}>
+                        <div className="flex items-center">
+                          <h2 className="text-lg font-semibold text-gray-900">Filters</h2>
+                          {(searchFormData.carCategory !== 'all' || 
+                            filters.priceRange[0] > 0 || 
+                            filters.priceRange[1] < 1000 ||
+                            filters.transmission !== 'all' ||
+                            filters.fuelType !== 'all' ||
+                            filters.seats !== 'all' ||
+                            filters.agency !== 'all') && (
+                            <span className="ml-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                              {[
+                                searchFormData.carCategory !== 'all',
+                                filters.priceRange[0] > 0 || filters.priceRange[1] < 1000,
+                                filters.transmission !== 'all',
+                                filters.fuelType !== 'all',
+                                filters.seats !== 'all',
+                                filters.agency !== 'all'
+                              ].filter(Boolean).length}
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setFilters({
+                                category: 'all',
+                                priceRange: [0, 1000],
+                                transmission: 'all',
+                                fuelType: 'all',
+                                seats: 'all',
+                                agency: 'all'
+                              });
+                              handleSearchFormChange('carCategory', 'all');
+                            }}
+                            className="text-sm text-gray-500 hover:text-gray-700 h-8 px-3"
+                          >
+                            Clear all
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setIsFiltersOpen(false)}
+                            className="h-8 w-8 p-0 rounded-full hover:bg-gray-100"
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                      
+                      {/* Content */}
+                      <div className="flex-1 overflow-y-auto p-4 pb-safe">
+                        <div className="space-y-6">
+                          {/* Price Range */}
+                          <div className="space-y-3">
+                            <label className="block text-sm font-medium text-gray-700">Price per day (MAD)</label>
+                            <div className="flex items-center space-x-3">
+                              <Input
+                                type="number"
+                                placeholder="Min price"
+                                value={filters.priceRange[0]}
+                                onChange={(e) => handleFilterChange('priceRange', [parseInt(e.target.value) || 0, filters.priceRange[1]])}
+                                className="flex-1 h-11"
+                              />
+                              <span className="text-gray-400">—</span>
+                              <Input
+                                type="number"
+                                placeholder="Max price"
+                                value={filters.priceRange[1]}
+                                onChange={(e) => handleFilterChange('priceRange', [filters.priceRange[0], parseInt(e.target.value) || 1000])}
+                                className="flex-1 h-11"
+                              />
+                            </div>
+                          </div>
+
+                          {/* Transmission */}
+                          <div className="space-y-3">
+                            <label className="block text-sm font-medium text-gray-700">Transmission</label>
+                            <Select value={filters.transmission} onValueChange={(value) => handleFilterChange('transmission', value)}>
+                              <SelectTrigger className="w-full h-11">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="all">All transmissions</SelectItem>
+                                <SelectItem value="manual">Manual</SelectItem>
+                                <SelectItem value="automatic">Automatic</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+
+                          {/* Fuel Type */}
+                          <div className="space-y-3">
+                            <label className="block text-sm font-medium text-gray-700">Fuel Type</label>
+                            <Select value={filters.fuelType} onValueChange={(value) => handleFilterChange('fuelType', value)}>
+                              <SelectTrigger className="w-full h-11">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="all">All fuel types</SelectItem>
+                                <SelectItem value="petrol">Petrol</SelectItem>
+                                <SelectItem value="diesel">Diesel</SelectItem>
+                                <SelectItem value="hybrid">Hybrid</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+
+                          {/* Number of Seats */}
+                          <div className="space-y-3">
+                            <label className="block text-sm font-medium text-gray-700">Number of Seats</label>
+                            <Select value={filters.seats} onValueChange={(value) => handleFilterChange('seats', value)}>
+                              <SelectTrigger className="w-full h-11">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="all">All seat counts</SelectItem>
+                                <SelectItem value="2">2 seats</SelectItem>
+                                <SelectItem value="4">4 seats</SelectItem>
+                                <SelectItem value="5">5 seats</SelectItem>
+                                <SelectItem value="7">7+ seats</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+
+                          {/* Agency */}
+                          <div className="space-y-3">
+                            <label className="block text-sm font-medium text-gray-700">Rental Agency</label>
+                            <Select value={filters.agency} onValueChange={(value) => handleFilterChange('agency', value)}>
+                              <SelectTrigger className="w-full h-11">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="all">All agencies</SelectItem>
+                                {uniqueAgencies.map((agency) => (
+                                  <SelectItem key={agency} value={agency}>{agency}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* Bottom Action */}
+                      <div className="border-t border-gray-200 p-4 bg-white">
+                        <Button 
+                          onClick={() => setIsFiltersOpen(false)}
+                          className="w-full h-12 bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white font-semibold rounded-xl"
+                        >
+                          <SlidersHorizontal className="w-4 h-4 mr-2" />
+                          Apply Filters
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                
+                {/* Desktop Popover */}
+                <PopoverContent className="w-[95vw] max-w-[500px] p-0 hidden md:block" align="end">
                   <div className="p-3 sm:p-4 space-y-2 sm:space-y-3">
                     <div className="flex items-center justify-between">
                       <h3 className="font-semibold text-gray-900 text-sm">Filters</h3>
