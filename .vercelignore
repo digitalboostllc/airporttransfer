@@ -1,0 +1,26 @@
+# Development scripts - not needed for production
+scripts/
+
+# Development database
+prisma/dev.db
+prisma/dev.db-journal
+
+# Local environment files
+.env.local
+.env.development
+
+# Development tools
+.cursor/
+
+# Node modules (already ignored by default but being explicit)
+node_modules/
+
+# Build cache
+.next/
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db

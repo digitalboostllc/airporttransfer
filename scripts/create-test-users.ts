@@ -82,14 +82,14 @@ async function createTestUsers() {
       // If it's an agency owner, create the agency
       if (userData.role === 'agency_owner') {
         const existingAgency = await prisma.agency.findFirst({
-          where: { userId: newUser.id }
+          where: { user: { id: newUser.id } }
         });
 
         if (!existingAgency) {
-          await prisma.agency.create({
+          const newAgency = await prisma.agency.create({
             data: {
-              userId: newUser.id,
               name: 'Atlas Rent',
+              slug: 'atlas-rent',
               email: userData.email,
               phone: userData.phone,
               address: '123 Mohammed V Avenue, Casablanca',
@@ -99,6 +99,13 @@ async function createTestUsers() {
               licenseNumber: 'LIC-2024-001'
             }
           });
+
+          // Link the user to the agency
+          await prisma.user.update({
+            where: { id: newUser.id },
+            data: { agencyId: newAgency.id }
+          });
+
           console.log(`✅ Created agency for: ${userData.email}`);
         }
       }
