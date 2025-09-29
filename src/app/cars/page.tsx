@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { createPortal } from 'react-dom';
 import {
   Car as CarIcon,
   Users,
@@ -405,6 +406,13 @@ function CarListingContent() {
   const [isPickupDateOpen, setIsPickupDateOpen] = useState(false);
   const [isLocationOpen, setIsLocationOpen] = useState(false);
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
+  
+  // Client-side check for portal
+  const [isMounted, setIsMounted] = useState(false);
+  
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   // Location options
   const locations = [
@@ -629,8 +637,8 @@ function CarListingContent() {
                   </Button>
                 </PopoverTrigger>
                 
-                {/* Mobile Full-Screen Modal */}
-                {isPickupDateOpen && (
+                {/* Mobile Full-Screen Modal - Rendered via Portal */}
+                {isMounted && isPickupDateOpen && createPortal(
                   <div className="fixed inset-0 z-[9999] md:hidden">
                     {/* Backdrop */}
                     <div 
@@ -746,7 +754,8 @@ function CarListingContent() {
                         </Button>
                       </div>
                     </div>
-                  </div>
+                  </div>,
+                  document.body
                 )}
                 
                 {/* Desktop Popover */}
@@ -866,8 +875,8 @@ function CarListingContent() {
                   </Button>
                 </PopoverTrigger>
                 
-                {/* Mobile Full-Screen Modal */}
-                {isFiltersOpen && (
+                {/* Mobile Full-Screen Modal - Rendered via Portal */}
+                {isMounted && isFiltersOpen && createPortal(
                   <div className="fixed inset-0 z-[9999] md:hidden">
                     {/* Backdrop */}
                     <div 
@@ -1038,7 +1047,8 @@ function CarListingContent() {
                         </Button>
                       </div>
                     </div>
-                  </div>
+                  </div>,
+                  document.body
                 )}
                 
                 {/* Desktop Popover */}
