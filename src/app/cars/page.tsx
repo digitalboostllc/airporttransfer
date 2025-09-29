@@ -637,7 +637,7 @@ function CarListingContent() {
                   </Button>
                 </PopoverTrigger>
                 
-                {/* Mobile Full-Screen Modal - Rendered via Portal */}
+                {/* Mobile Bottom Sheet Modal - Rendered via Portal */}
                 {isMounted && isPickupDateOpen && createPortal(
                   <div className="fixed inset-0 z-[9999] md:hidden">
                     {/* Backdrop */}
@@ -646,13 +646,10 @@ function CarListingContent() {
                       onClick={() => setIsPickupDateOpen(false)} 
                     />
                     
-                    {/* Modal Container */}
-                    <div className="absolute inset-0 flex flex-col bg-white">
+                    {/* Bottom Sheet Container */}
+                    <div className="absolute inset-x-0 top-20 bottom-0 flex flex-col bg-white rounded-t-2xl shadow-2xl animate-in slide-in-from-bottom duration-300">
                       {/* Header */}
-                      <div 
-                        className="flex-shrink-0 bg-white border-b border-gray-200 px-4 py-4 flex items-center justify-between shadow-sm"
-                        style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}
-                      >
+                      <div className="flex-shrink-0 bg-white border-b border-gray-200 rounded-t-2xl px-4 py-4 flex items-center justify-between">
                         <h2 className="text-lg font-semibold text-gray-900">Select Rental Dates</h2>
                         <Button
                           variant="ghost"
@@ -742,7 +739,7 @@ function CarListingContent() {
                       
                       {/* Bottom Action */}
                       <div 
-                        className="flex-shrink-0 border-t border-gray-200 p-4 bg-white"
+                        className="flex-shrink-0 border-t border-gray-200 p-4 bg-white rounded-b-2xl"
                         style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}
                       >
                         <Button 
@@ -875,7 +872,7 @@ function CarListingContent() {
                   </Button>
                 </PopoverTrigger>
                 
-                {/* Mobile Full-Screen Modal - Rendered via Portal */}
+                {/* Mobile Bottom Sheet Modal - Rendered via Portal */}
                 {isMounted && isFiltersOpen && createPortal(
                   <div className="fixed inset-0 z-[9999] md:hidden">
                     {/* Backdrop */}
@@ -884,13 +881,10 @@ function CarListingContent() {
                       onClick={() => setIsFiltersOpen(false)} 
                     />
                     
-                    {/* Modal Container */}
-                    <div className="absolute inset-0 flex flex-col bg-white">
+                    {/* Bottom Sheet Container */}
+                    <div className="absolute inset-x-0 top-20 bottom-0 flex flex-col bg-white rounded-t-2xl shadow-2xl animate-in slide-in-from-bottom duration-300">
                       {/* Header */}
-                      <div 
-                        className="flex-shrink-0 bg-white border-b border-gray-200 px-4 py-4 flex items-center justify-between shadow-sm"
-                        style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}
-                      >
+                      <div className="flex-shrink-0 bg-white border-b border-gray-200 rounded-t-2xl px-4 py-4 flex items-center justify-between">
                         <div className="flex items-center">
                           <h2 className="text-lg font-semibold text-gray-900">Filters</h2>
                           {(searchFormData.carCategory !== 'all' || 
@@ -1035,7 +1029,7 @@ function CarListingContent() {
                       
                       {/* Bottom Action */}
                       <div 
-                        className="flex-shrink-0 border-t border-gray-200 p-4 bg-white"
+                        className="flex-shrink-0 border-t border-gray-200 p-4 bg-white rounded-b-2xl"
                         style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}
                       >
                         <Button 
